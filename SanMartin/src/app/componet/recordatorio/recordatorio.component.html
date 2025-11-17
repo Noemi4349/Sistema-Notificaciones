@@ -1,0 +1,359 @@
+<div class="p-grid p-0">
+  <!-- 🕒 SECCIÓN DE PROGRAMACIÓN AUTOMÁTICA -->
+  <div class="p-col-12">
+    <div class="programar-envio p-card shadow-1 p-3 border-round bg-surface-100">
+      <h3 class="titulo-envio">🕒 PROGRAMAR HORA ENVÍO</h3>
+      <div class="hora-container">
+        <div class="hora-selector">
+          <label for="horaEnvio" class="hora-etiqueta">Hora:</label>
+          <input
+            id="horaEnvio"
+            type="time"
+            [(ngModel)]="horaProgramada"
+            class="p-inputtext p-component input-hora"
+          />
+          <p-button
+            label="Guardar"
+            (onClick)="guardarHoraProgramada()"
+            styleClass="p-button-warning p-button-sm boton-guardar">
+          </p-button>
+        </div>
+        
+        <!-- Mensaje de confirmación y contador EN 2 LÍNEAS -->
+        <div *ngIf="horaGuardada" class="guardar-hora">
+          <p class="text-green-600 font-semibold mensaje-guardado">
+            ✅ Envío programado para {{ horaGuardada }}
+          </p>
+          <p *ngIf="tiempoRestante" class="contador">
+            ⏱️ Faltan: 
+            <strong *ngIf="tiempoRestante.dias > 0">{{ tiempoRestante.dias }}d </strong>
+            <strong>{{ tiempoRestante.horas }}h </strong>
+            <strong>{{ tiempoRestante.minutos }}m </strong>
+            <strong>{{ tiempoRestante.segundos }}s</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💬 PANEL PRINCIPAL DE RECORDATORIOS -->
+  <div class="p-col-12">
+    <div class="p-card p-5 bg-surface-50 border-round shadow-1 mt-3">
+
+      <!-- Encabezado y botones alineados a la derecha -->
+      <div class="encabezado-recordatorio">
+        <h2 class="text-900 font-bold titulo-recordatorio">💳 Recordatorio</h2>
+
+        <div class="botones-derecha">
+          <p-button
+            label="Insertar SMS"
+            icon="pi pi-pencil"
+            styleClass="p-button-success p-button-sm"
+            (onClick)="mostrarCampoMensaje = !mostrarCampoMensaje">
+          </p-button>
+
+          <p-button
+            label="Ver reporte"
+            icon="pi pi-chart-bar"
+            styleClass="p-button-warning p-button-sm"
+            (onClick)="verReporte = !verReporte">
+          </p-button>
+        </div>
+      </div>
+
+      <!-- 📝 Campo de mensaje personalizado -->
+      <div *ngIf="mostrarCampoMensaje" class="mb-4 mt-3">
+        <label class="font-semibold mb-2 block">Mensaje de recordatorio:</label>
+        <textarea
+          [(ngModel)]="mensajePersonalizado"
+          rows="6"
+          placeholder="Escribe aquí tu mensaje de recordatorio..."
+          class="p-inputtext p-component w-full">
+        </textarea>
+        <!-- 👇 Botones para guardar o cancelar -->
+  <div class="flex justify-content-end gap-2">
+    <p-button
+      label="Cancelar"
+      icon="pi pi-times"
+      styleClass="p-button-text p-button-sm"
+      (onClick)="cancelarMensaje()">
+    </p-button>
+    <p-button
+      label="Guardar mensaje"
+      icon="pi pi-save"
+      styleClass="p-button-success p-button-sm"
+      (onClick)="guardarMensajePersonalizado()"
+      [loading]="loading">
+    </p-button>
+  </div>
+      </div>
+<!--TRABAJANDO AQUIII-->
+      <!-- 👁️ Vista previa centrada tipo móvil -->
+      <div class="vista-previa-movil" *ngIf="mensajePersonalizado && mostrarCampoMensaje">
+        <h4 class="text-center text-900 font-semibold mb-3">Vista previa del mensaje 💬</h4>
+        <div class="contenedor-movil">
+          <div class="mensaje-preview-movil">
+            <p style="white-space: pre-line;">{{ mensajePersonalizado }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 📋 Tabla de clientes con cuotas pendientes - Ancho completo -->
+      <div class="tabla-socios-full mt-4">
+        <p-table
+          [value]="socios"
+          [paginator]="true"
+          [rows]="10"
+          [loading]="loading"
+          responsiveLayout="scroll"
+          class="shadow-2 border-round"
+          [globalFilterFields]="['nombreCompleto', 'telefono', 'numeroSocio']">
+          
+          <ng-template pTemplate="caption">
+            <div class="flex justify-content-between align-items-center">
+              <span class="text-xl font-bold text-900">
+                📋 Socios con Creditos Activos ({{ socios.length }})
+              </span>
+               <button pButton 
+                      label="Agregar Usuario" 
+                      icon="pi pi-user-plus"
+                      class="p-button-success boton-agregar"
+                      (click)="mostrarModalAgregar = true">
+              </button>
+             <p-dialog 
+  header="Registrar nuevo usuario"
+  [(visible)]="mostrarModalAgregar"
+  [modal]="true"
+  [style]="{ width: '450px' }"
+  [draggable]="false">
+
+  <div class="p-fluid">
+
+      <div class="p-field">
+          <label>Número Socio</label>
+          <input pInputText [(ngModel)]="nuevoUsuario.numeroSocio">
+      </div>
+
+      <div class="p-field">
+          <label>Nombre completo</label>
+          <input pInputText [(ngModel)]="nuevoUsuario.nombreCompleto">
+      </div>
+
+      <div class="p-field">
+          <label>WhatsApp</label>
+          <input pInputText [(ngModel)]="nuevoUsuario.telefono">
+      </div>
+
+      <div class="p-field">
+          <label>N° Crédito</label>
+          <input pInputText [(ngModel)]="nuevoUsuario.numeroCredito">
+      </div>
+
+      <div class="p-field">
+          <label>Fecha Vencimiento</label>
+          <input type="date" pInputText [(ngModel)]="nuevoUsuario.fechaVencimiento">
+      </div>
+
+      <button pButton 
+        label="Guardar"
+        icon="pi pi-check"
+        class="p-button-primary mt-3"
+        (click)="guardarNuevoUsuario()">
+      </button>
+
+  </div>
+</p-dialog>
+ 
+
+
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="numeroSocio">
+                Nº Socio
+                <p-sortIcon field="numeroSocio"></p-sortIcon>
+              </th>
+            
+            
+              <th pSortableColumn="nombreCompleto">
+                Nombre Completo
+                <p-sortIcon field="nombreCompleto"></p-sortIcon>
+              </th>
+              <th pSortableColumn="telefono">
+                Teléfono
+                <p-sortIcon field="telefono"></p-sortIcon>
+              </th>
+          
+              <th pSortableColumn="Nº Credito">
+                 Nº Credito 
+                  <p-sortIcon field="Nº Credito"></p-sortIcon>
+                </th>
+            
+              <th pSortableColumn="fechaVencimiento">
+                Fecha vencimiento
+                <p-sortIcon field="fechaVencimiento"></p-sortIcon>
+              </th>
+              <th>Acciones</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-socio>
+            <tr>
+               <!-- COLUMNA 1: ID Socio -->
+              <td>
+                <span class="font-semibold">{{ socio.numeroSocio }}</span>
+              <!--  <br>
+              <small class="text-500">Socio: {{ socio.numeroSocio }}</small>-->
+              </td>
+                <!-- COLUMNA 2: Nombre Completo --> 
+              <td>
+                <span class="font-semibold">{{ socio.nombreCompleto }}</span>
+              </td>
+              <!-- COLUMNA 3: Teléfono -->
+              <td>
+                <i class="pi pi-phone mr-2"></i>
+                {{ socio.telefono }}
+              </td>
+                <!-- COLUMNA 4: Nº Credito -->
+                <td>
+                  <span class="font-semibold">{{ socio.numeroCredito }}</span>
+                </td>
+             <!--<td>
+                <span class="text-red-600 font-bold" style="font-size: 1.1rem;">
+                  Bs. {{ socio.montoPendiente | number:'1.2-2' }}
+                </span>
+              </td> --> 
+                <!-- COLUMNA 5: Fecha Vencimiento -->
+              <td>
+                <span [class]="getDiasRestantes(socio.fechaVencimiento) <= 3 ? 'text-red-600 font-bold' : 'text-600'">
+                  {{ socio.fechaVencimiento | date:'dd/MM/yyyy' }}
+                </span>
+                <br>
+                <small [class]="getDiasRestantes(socio.fechaVencimiento) <= 3 ? 'text-red-500' : 'text-500'">
+                  {{ getDiasRestantesTexto(socio.fechaVencimiento) }}
+                </small>
+              </td>
+              <!-- COLUMNA 6: Acciones -->
+              <td>
+                <p-button
+                  label="Enviar Ahora"
+                  icon="pi pi-send"
+                  styleClass="p-button-sm p-button-rounded p-button-primary"
+                  (onClick)="enviarRecordatorio(socio)"
+                  [loading]="loading">
+                </p-button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center p-5">
+                <div class="flex flex-column align-items-center gap-3">
+                  <!--<i class="pi pi-check-circle" style="font-size: 3rem; color: #10b981;"></i> -->
+             <!--     <p class="text-600 font-semibold text-xl m-0">
+                    ✅ No hay clientes con cuotas pendientes
+                  </p>-->
+                  <p class="text-500 m-0">Todos los socios están al día con sus pagos</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+
+      <!-- 📊 Reporte mejorado - Debajo de la tabla -->
+      <div *ngIf="verReporte" class="reporte-completo mt-4 seccion-imprimible">
+  <div class="header-reporte">
+    <h3 class="text-900 font-bold">📜 Reporte de pagos</h3>
+    <div class="flex gap-2 no-imprimir">
+      <p-button
+        label="Imprimir"
+        icon="pi pi-print"
+        styleClass="p-button-warning p-button-sm"
+        (onClick)="imprimirReporte()">
+      </p-button>
+    </div>
+  </div>
+        
+        <p-table 
+          [value]="reporteEnvios" 
+          [rows]="10" 
+          [paginator]="true" 
+          responsiveLayout="scroll" 
+          class="mt-3 tabla-reporte"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} envíos">
+          
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Nº Socio</th>
+              <th>Nombre Socio</th>
+              <th>Teléfono</th>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Estado</th>
+              
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-registro>
+            <tr>
+              <td>
+               {{ registro.numeroSocio }}
+              </td>
+              <td>
+                {{ registro.nombre }}
+              </td>
+              <td>
+                <i class="pi pi-phone mr-2"></i>
+                {{ registro.telefono }}
+              </td>
+              <td>{{ registro.fecha | date:'dd/MM/yyyy' }}</td>
+              <td>{{ registro.fecha | date:'HH:mm:ss' }}</td>
+              <td>
+                <span 
+                  class="p-badge"
+                  [ngClass]="{
+                    'p-badge-success': registro.estado === 'ENVIADO',
+                    'p-badge-danger': registro.estado === 'ERROR',
+                    'p-badge-warning': registro.estado === 'PENDIENTE'
+                  }">
+                  {{ registro.estado }}
+                </span>
+              </td>
+           <!--   <td>
+                <span class="font-bold">
+                  Bs. {{ registro.montoPendiente | number:'1.2-2' }}
+                </span>
+              </td>-->
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="text-center p-4">
+                <i class="pi pi-inbox" style="font-size: 2rem; color: #94a3b8;"></i>
+                <p class="text-600 mt-2 mb-0">No hay envíos registrados</p>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="summary">
+            <div class="flex justify-content-between align-items-center p-3 bg-blue-50 border-round">
+              <span class="font-semibold">
+                Total de envíos: <span class="text-primary">{{ reporteEnvios.length }}</span>
+              </span>
+              
+            </div>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast para notificaciones -->
+<p-toast position="top-right"></p-toast>

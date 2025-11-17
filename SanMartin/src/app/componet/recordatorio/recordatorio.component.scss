@@ -1,0 +1,765 @@
+// === CONFIGURACIÓN BASE ===
+:host {
+  display: block;
+  padding: 0 1rem 1rem 1rem;
+  background-color: var(--surface-ground); // 👈 Se adapta automáticamente
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+// === 🕒 SECCIÓN DE PROGRAMACIÓN AUTOMÁTICA ===
+.programar-envio {
+  max-width: 480px;
+  margin-left: 0;
+  padding: 0.7rem 1rem !important;
+  background-color: var(--surface-card) !important; // 👈 Adaptativo
+  border: 1px solid var(--surface-border) !important; // 👈 Borde adaptativo
+  border-radius: 5px;
+
+  .titulo-envio {
+    font-size: 1rem;
+    margin: 0 0 0.6rem 0;
+    font-weight: 600;
+    color: var(--text-color); // 👈 Texto adaptativo
+  }
+
+  .hora-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .hora-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    .hora-etiqueta {
+      font-weight: 500;
+      margin: 0;
+      min-width: 40px;
+      color: var(--text-color); // 👈 Adaptativo
+    }
+
+    .input-hora {
+      width: 80px !important;
+      height: 32px !important;
+      padding: 0.3rem 0.5rem !important;
+      font-size: 0.9rem !important;
+      background-color: var(--surface-ground) !important; // 👈 Adaptativo
+      color: var(--text-color) !important; // 👈 Adaptativo
+      border: 1px solid var(--surface-border) !important; // 👈 Adaptativo
+
+      &:focus {
+        border-color: var(--primary-color); // 👈 Color primario del tema
+        box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2);
+        outline: none;
+      }
+    }
+
+    .boton-guardar {
+      height: 39px;
+      
+      ::ng-deep .p-button {
+        height: 39px !important;
+      }
+      
+      ::ng-deep .p-button-label {
+        font-size: 0.85rem;
+      }
+    }
+  }
+
+  .guardar-hora {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+    padding: 3px;
+    background-color: transparent;
+    border: none;
+
+    .mensaje-guardado {
+      font-size: 0.85rem;
+      margin: 0;
+      color: #10b981; // 👈 Verde fijo (se ve bien en ambos modos)
+      
+      ::ng-deep {
+        display: flex;
+        align-items: center;
+        gap: 0.1rem;
+      }
+    }
+
+    .contador {
+      color: var(--text-color); // 👈 Adaptativo
+      font-size: 0.9rem;
+      margin: 0;
+      font-weight: 500;
+
+      strong {
+        color: var(--primary-color); // 👈 Color primario adaptativo
+        font-size: 1rem;
+        font-weight: 700;
+        background-color: rgba(var(--primary-color-rgb), 0.1);
+        padding: 2px 6px;
+        border-radius: 4px;
+        margin: 0 3px;
+      }
+    }
+  }
+}
+
+// === 💬 PANEL PRINCIPAL ===
+.encabezado-recordatorio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  .titulo-recordatorio {
+    font-size: 1.5rem;
+    color: var(--text-color); // 👈 Adaptativo
+    margin: 0;
+  }
+
+  .botones-derecha {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+}
+
+// === 📝 CAMPO DE MENSAJE ===
+//textarea.p-inputtext {
+ // resize: vertical;
+ // min-height: 100px;
+ // font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ // font-size: 0.95rem;
+ // border: 2px solid var(--surface-border); // 👈 Adaptativo
+ // border-radius: 8px;
+ // transition: all 0.3s ease;
+ // background-color: var(--surface-card) !important; // 👈 Adaptativo
+ // color: var(--text-color) !important; // 👈 Adaptativo
+
+ // &:focus {
+  //  border-color: var(--primary-color); // 👈 Adaptativo
+  //  box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+  //  outline: none;
+  //}
+//}
+// === 📝 CAMPO DE MENSAJE (ACTUALIZADO - SIN SCROLL LATERAL) ===
+textarea.p-inputtext {
+  resize: vertical;
+  min-height: 100px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 0.95rem;
+  border: 2px solid var(--surface-border);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  background-color: var(--surface-card) !important;
+  color: var(--text-color) !important;
+  
+  // 🔥 QUITAR BARRA DE SCROLL LATERAL
+  overflow-x: hidden; // ✅ Oculta el scroll horizontal
+  overflow-y: auto;   // ✅ Mantiene scroll vertical si es necesario
+  
+  // 🎨 Personalizar scrollbar (solo Chrome, Edge, Safari)
+  &::-webkit-scrollbar {
+    width: 6px; // Barra más delgada
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: transparent; // Fondo transparente
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(128, 128, 128, 0.3); // Gris semi-transparente
+    border-radius: 3px;
+    
+    &:hover {
+      background: rgba(128, 128, 128, 0.5); // Más oscuro al hover
+    }
+  }
+
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+    outline: none;
+  }
+}
+
+// Contenedor de botones de mensaje
+.flex.justify-content-end.gap-2 {
+  margin-top: 0.5rem;
+  
+  ::ng-deep .p-button {
+    min-width: 100px;
+    
+    &.p-button-text {
+      color: var(--text-color-secondary);
+      
+      &:hover {
+        background-color: var(--surface-hover);
+      }
+    }
+  }
+}
+
+// === 👁️ VISTA PREVIA TIPO MÓVIL ===
+.vista-previa-movil {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background: var(--surface-overlay); // 👈 Adaptativo
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border: 1px solid var(--surface-border); // 👈 Adaptativo
+
+  h4 {
+    color: var(--text-color); // 👈 Adaptativo
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+
+  .contenedor-movil {
+    max-width: 420px;
+    margin: 0 auto;
+    background: var(--surface-card); // 👈 Adaptativo
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    border: 3px solid var(--surface-border); // 👈 Adaptativo
+
+    .mensaje-preview-movil {
+      padding: 1.2rem;
+      background: var(--surface-ground); // 👈 Adaptativo
+      min-height: 100px;
+
+      p {
+        margin: 0;
+        color: var(--text-color); // 👈 Adaptativo
+        font-size: 0.95rem;
+        line-height: 1.6;
+        white-space: pre-line;
+        word-wrap: break-word;
+      }
+    }
+  }
+}
+
+// === 📋 TABLA DE CLIENTES ===
+.tabla-socios-full {
+  width: 100%;
+}
+
+// === ADAPTACIÓN DE TARJETAS PRIMENG ===
+::ng-deep .p-card {
+  background-color: var(--surface-card) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--surface-border) !important;
+
+  .p-card-body {
+    background-color: var(--surface-card) !important;
+    color: var(--text-color) !important;
+  }
+
+  .p-card-content {
+    background-color: var(--surface-card) !important;
+    color: var(--text-color) !important;
+  }
+}
+
+// === ADAPTACIÓN DE TABLAS PRIMENG ===
+::ng-deep .p-datatable {
+  background-color: var(--surface-card) !important;
+  color: var(--text-color) !important;
+  
+  .p-datatable-header {
+    background-color: var(--surface-card) !important;
+    color: var(--text-color) !important;
+    border-color: var(--surface-border) !important;
+  }
+  
+  .p-datatable-thead > tr > th {
+    background-color: var(--surface-card) !important;
+    color: var(--text-color) !important;
+    border-color: var(--surface-border) !important;
+    font-weight: 600;
+  }
+  
+  .p-datatable-tbody > tr {
+    background-color: var(--surface-card) !important;
+    color: var(--text-color) !important;
+    
+    &:hover {
+      background-color: var(--surface-hover) !important;
+    }
+  }
+  
+  .p-datatable-tbody > tr > td {
+    border-color: var(--surface-border) !important;
+    color: var(--text-color) !important;
+  }
+
+  .p-datatable-emptymessage > td {
+    color: var(--text-color-secondary) !important;
+  }
+}
+
+// === 📊 REPORTE ===
+.reporte-completo {
+  width: 100%;
+  padding: 1.5rem;
+  background: var(--surface-card); // 👈 Adaptativo
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--surface-border); // 👈 Adaptativo
+
+  .header-reporte {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    h3 {
+      color: var(--text-color); // 👈 Adaptativo
+      margin: 0;
+      font-size: 1.2rem;
+    }
+  }
+   .tabla-reporte {
+  font-family: 'Arial', sans-serif; /* Tipo de letra deseado */
+  font-size: 14px;                  /* Tamaño uniforme */
+  font-weight: 400;                 /* Peso normal */
+}
+
+  // Sobrescribir el estilo de la tabla del reporte
+  .p-datatable {
+    .p-datatable-thead > tr > th {
+      background-color: var(--surface-card) !important;
+      color: var(--text-color) !important;
+      border-color: var(--surface-border) !important;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .p-datatable-tbody > tr > td {
+      font-size: 0.85rem;
+    }
+  }
+}
+
+// === 🎨 CLASES DE UTILIDAD ===
+.text-green-600 {
+  color: #10b981 !important; // Verde fijo (se ve bien en ambos modos)
+}
+
+.text-red-600 {
+  color: #ef4444 !important; // Rojo fijo (se ve bien en ambos modos)
+}
+
+.text-red-500 {
+  color: #f87171 !important;
+}
+
+.text-600 {
+  color: var(--text-color-secondary) !important; // 👈 Adaptativo
+}
+
+.text-500 {
+  color: var(--text-color-secondary) !important; // 👈 Adaptativo
+}
+
+.font-bold {
+  font-weight: 700 !important;
+}
+
+.font-semibold {
+  font-weight: 600 !important;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.btn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: 0.2s;
+  color: white;
+}
+
+.btn-green {
+  background-color: #2ecc71;
+}
+
+.btn-green:hover {
+  background-color: #27ae60;
+}
+
+/* === Modal simple === */
+
+.modal-background {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-box {
+  background: white;
+  padding: 25px;
+  width: 380px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.modal-box h3 {
+  margin-top: 0;
+  margin-bottom: 15px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-secondary {
+  background: #7f8c8d;
+}
+
+.btn-secondary:hover {
+  background: #636e72;
+}
+
+
+// === 📱 RESPONSIVE ===
+@media (max-width: 768px) {
+  .programar-envio {
+    .hora-selector {
+      flex-direction: column;
+      align-items: stretch;
+
+      .input-hora {
+        max-width: 100%;
+      }
+    }
+  }
+
+  .encabezado-recordatorio {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .titulo-recordatorio {
+      font-size: 1.3rem;
+    }
+
+    .botones-derecha {
+      width: 100%;
+      justify-content: stretch;
+
+      ::ng-deep .p-button {
+        flex: 1;
+        min-width: 0;
+      }
+    }
+  }
+
+  .vista-previa-movil {
+    padding: 1rem;
+
+    .contenedor-movil {
+      max-width: 100%;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .programar-envio {
+    padding: 0.8rem !important;
+
+    .titulo-envio {
+      font-size: 1rem;
+    }
+  }
+
+  .encabezado-recordatorio {
+    .titulo-recordatorio {
+      font-size: 1.1rem;
+    }
+  }
+
+  .reporte-completo {
+    padding: 1rem;
+  }
+}
+
+// === 🖨️ ESTILOS DE IMPRESIÓN ===
+@media print {
+ // .programar-envio,
+ // .botones-derecha,
+ // .vista-previa-movil {
+  //  display: none !important;
+   :host > *:not(.p-grid),
+  .programar-envio,
+  .encabezado-recordatorio,
+  .botones-derecha,
+  .vista-previa-movil,
+  .tabla-socios-full,
+  .mb-4,
+  p-button,
+  .header-reporte .flex {
+    display: none !important;
+  
+  }
+  .reporte-completo {
+    display: block !important;
+    background: white !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 20px !important;
+    page-break-inside: avoid;
+
+    .header-reporte {
+      display: block !important;
+      margin-bottom: 20px !important;
+
+      h3 {
+        color: #000 !important;
+        font-size: 1.5rem !important;
+        text-align: center !important;
+      }
+
+      .flex {
+        display: none !important; // Ocultar botón de imprimir
+      }
+    }
+  }
+
+  // Ajustar tabla para impresión
+  ::ng-deep .p-datatable {
+    width: 100% !important;
+    background: white !important;
+
+    .p-datatable-thead > tr > th {
+      background-color: #f3f4f6 !important;
+      color: #000 !important;
+      border: 1px solid #000 !important;
+      padding: 10px !important;
+      font-weight: bold !important;
+      font-size: 11px !important;
+    }
+
+    .p-datatable-tbody > tr > td {
+      border: 1px solid #ddd !important;
+      padding: 8px !important;
+      color: #000 !important;
+      font-size: 10px !important;
+    }
+
+    .p-paginator,
+    .p-datatable-footer {
+      display: none !important;
+    }
+  }
+
+  // Ocultar badges y mantener solo texto
+  .p-badge {
+    background: none !important;
+    color: #000 !important;
+    border: 1px solid #000 !important;
+    padding: 2px 6px !important;
+  }
+
+  // Asegurar que todo el contenido sea visible
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  // Eliminar saltos de página dentro de filas
+  tr {
+    page-break-inside: avoid;
+  }
+
+ .no-imprimir {
+  @media print {
+    display: none !important;
+  }
+}
+
+  //.reporte-completo {
+  //  background: white;
+  //  border: none;
+ //   box-shadow: none;
+ // }
+
+ // ::ng-deep {
+  //  .p-paginator {
+  //    display: none !important;
+  //  }
+
+ //   .p-button {
+ //     display: none !important;
+ //   }
+ // }
+}
+
+// === ✨ ANIMACIONES ===
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.guardar-hora,
+.vista-previa-movil,
+.reporte-completo {
+  animation: slideIn 0.3s ease;
+}
+
+// === 🎯 MEJORAS DE ACCESIBILIDAD ===
+*:focus-visible {
+  outline: 2px solid var(--primary-color); // 👈 Adaptativo
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+// === 💎 UTILIDADES ADICIONALES ===
+.shadow-1 {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-2 {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.border-round {
+  border-radius: 8px;
+}
+
+.bg-surface-50 {
+  background-color: var(--surface-50) !important; // 👈 Adaptativo
+}
+
+.bg-surface-100 {
+  background-color: var(--surface-100) !important; // 👈 Adaptativo
+}
+
+.text-900 {
+  color: var(--text-color) !important; // 👈 Adaptativo
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.mt-4 {
+  margin-top: 1.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.block {
+  display: block;
+}
+
+// === ADAPTACIÓN DE BADGES ===
+::ng-deep .p-badge {
+  &.p-badge-success {
+    background-color: #10b981;
+    color: white;
+  }
+
+  &.p-badge-danger {
+    background-color: #ef4444;
+    color: white;
+  }
+
+  &.p-badge-warning {
+    background-color: #f59e0b;
+    color: white;
+  }
+}
+
+// === ADAPTACIÓN DE BOTONES ===
+::ng-deep .p-button {
+  transition: all 0.3s ease;
+
+  // 👇 Asegurar que los iconos se muestren correctamente
+  .p-button-icon {
+    font-size: 1rem;
+    line-height: 1;
+    display: inline-block !important;
+    visibility: visible !important;
+  }
+
+  &.p-button-icon-only {
+    .p-button-icon {
+      margin: 0;
+    }
+  }
+
+  // Hover sin transform para evitar que el icono desaparezca
+  &:hover:not(:disabled) {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    
+    .p-button-icon {
+      display: inline-block !important;
+      visibility: visible !important;
+    }
+  }
+}
+
+// === ADAPTACIÓN DE INPUTS ===
+::ng-deep .p-inputtext {
+  background-color: var(--surface-card) !important;
+  color: var(--text-color) !important;
+  border: 1px solid var(--surface-border) !important;
+
+  &:enabled:focus {
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.2) !important;
+  }
+}

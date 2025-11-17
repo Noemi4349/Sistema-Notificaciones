@@ -1,0 +1,88 @@
+<div class="utility-buttons">
+  <app-floating-configurator></app-floating-configurator>
+</div>
+
+<div class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-[100vw]  overflow-hidden">
+  <div class="flex flex-col items-center justify-center">
+    <div style="border-radius: 56px; padding: 0.3rem; background: linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)">
+      <div class="w-full bg-surface-0 dark:bg-surface-900 py-5 px-8 sm:px-20" style="border-radius: 53px">
+
+        <!-- Logo y título -->
+        <div class="text-center mb-8">
+          
+            <img src="assets/image/sanmartin.png" alt="Logo" class="mb-3 w-16 shrink-0 mx-auto" style="width: 135px" />
+ 
+          <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">"San Martín" R. L.</div>
+          <span class="text-muted-color font-medium">Ingresa tus Credenciales para Continuar</span>
+        </div>
+
+        <!-- ⭐ Mensaje de Error -->
+        <div *ngIf="errorMessage" class="mb-6 p-4 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded">
+          <div class="flex items-center">
+            <i class="pi pi-exclamation-circle text-red-500 mr-3"></i>
+            <span class="text-red-700 dark:text-red-400 font-medium">{{ errorMessage }}</span>
+          </div>
+        </div>
+
+        <!-- ⭐ Formulario con (ngSubmit) -->
+        <form (ngSubmit)="onLogin()">
+          <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Usuario</label>
+          <input 
+            pInputText 
+            id="email1" 
+            type="text" 
+            name="username"
+            placeholder="Introduce Usuario" 
+            class="w-full md:w-120 mb-8" 
+            [(ngModel)]="username"
+            (input)="clearError()"
+            [disabled]="isLoading"
+            required
+          />
+
+          <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Contraseña</label>
+          <p-password 
+            id="password1" 
+            name="password"
+            [(ngModel)]="password" 
+            placeholder="Introduce tu Contraseña" 
+            [toggleMask]="true" 
+            styleClass="mb-4" 
+            [fluid]="true" 
+            [feedback]="false"
+            (input)="clearError()"
+            [disabled]="isLoading"
+            required
+          ></p-password>
+
+          <div class="flex items-center justify-between mt-2 mb-8 gap-8">
+            <div class="flex items-center">
+              <p-checkbox 
+                [(ngModel)]="checked" 
+                id="rememberme1" 
+                name="remember"
+                binary 
+                class="mr-2"
+                [disabled]="isLoading"
+              ></p-checkbox>
+              <label for="rememberme1">Recordar</label>
+            </div>
+            <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">
+              ¿Olvidaste tu Contraseña?
+            </span>
+          </div>
+
+          <!-- ⭐ Botón con type="submit" y estado de carga -->
+          <p-button 
+            type="submit"
+            [label]="isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'" 
+            styleClass="w-full py-2 rounded-md bg-[var(--p-primary-500)] text-white dark:bg-emerald-600"
+            [loading]="isLoading"
+            [disabled]="isLoading || !username || !password"
+          ></p-button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>

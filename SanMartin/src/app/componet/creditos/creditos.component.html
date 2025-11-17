@@ -1,0 +1,705 @@
+<div class="p-grid p-0">
+  <!-- 🕒 SECCIÓN DE PROGRAMACIÓN AUTOMÁTICA -->
+  <div class="p-col-12">
+    <div class="programar-envio p-card shadow-1 p-3 border-round bg-surface-100">
+      <h3 class="titulo-envio">🕒 PROGRAMAR HORA ENVÍO</h3>
+      <div class="hora-container">
+        <div class="hora-selector">
+          <label for="horaEnvio" class="hora-etiqueta">Hora:</label>
+          <input
+            id="horaEnvio"
+            type="number"
+            [(ngModel)]="horaEnvio"
+            min="0"
+            max="23"
+            class="p-inputtext p-component input-hora"
+            style="width: 80px; margin-right: 10px;"
+          />
+          <span>:</span>
+          <input
+            id="minutoEnvio"
+            type="number"
+            [(ngModel)]="minutoEnvio"
+            min="0"
+            max="59"
+            class="p-inputtext p-component input-hora"
+            style="width: 80px; margin: 0 10px;"
+          />
+          <p-button
+            label="Guardar"
+            (onClick)="guardarConfiguracion()"
+            styleClass="p-button-warning p-button-sm boton-guardar">
+          </p-button>
+        </div>
+        
+        <!-- Mensaje de confirmación y contador EN 2 LÍNEAS -->
+        <div *ngIf="schedulerActivo" class="guardar-hora">
+          <p class="text-green-600 font-semibold mensaje-guardado">
+            ✅ Envío programado para {{ formatearHora(horaEnvio, minutoEnvio) }}
+          </p>
+          <p *ngIf="tiempoRestante" class="contador">
+            ⏱️ Próximo envío en: <strong>{{ tiempoRestante }}</strong>
+          </p>
+        </div>
+
+        <!-- Controles de inicio/pausa -->
+        <div class="flex gap-2 mt-3">
+          <p-button
+            *ngIf="!schedulerActivo"
+            label="Iniciar Monitoreo"
+            icon="pi pi-play"
+            (onClick)="iniciarMonitoreoAutomatico()"
+            styleClass="p-button-success p-button-sm">
+          </p-button>
+          <p-button
+            *ngIf="schedulerActivo"
+            label="Detener Monitoreo"
+            icon="pi pi-pause"
+            (onClick)="detenerMonitoreoAutomatico()"
+            styleClass="p-button-danger p-button-sm">
+          </p-button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💬 PANEL PRINCIPAL DE RECORDATORIOS -->
+  <div class="p-col-12">
+    <div class="p-card p-5 bg-surface-50 border-round shadow-1 mt-3">
+
+      <!-- Encabezado y botones alineados a la derecha -->
+      <div class="encabezado-recordatorio">
+        <h2 class="text-900 font-bold titulo-recordatorio">💳 Gestión de Créditos y Recordatorios</h2>
+
+        <div class="botones-derecha flex gap-2">
+          <p-button
+            label="Envío Masivo"
+            icon="pi pi-send"
+            styleClass="p-button-primary p-button-sm"
+            (onClick)="displayEnvioMasivoDialog = true"
+            [loading]="loadingEnvio">
+          </p-button>
+
+          <p-button
+            label="Test Mensaje"
+            icon="pi pi-mobile"
+            styleClass="p-button-info p-button-sm"
+            (onClick)="abrirDialogTest()">
+          </p-button>
+
+          <p-button
+            label="Ver Registros"
+            icon="pi pi-chart-bar"
+            styleClass="p-button-warning p-button-sm"
+            (onClick)="abrirRegistros()">
+          </p-button>
+
+          <p-button
+            label="Próximos Envíos"
+            icon="pi pi-calendar"
+            styleClass="p-button-help p-button-sm"
+            (onClick)="displayEnvioMasivoDialog = true">
+          </p-button>
+        </div>
+      </div>
+
+      <!-- 📊 Estadísticas -->
+      <div *ngIf="estadisticas" class="grid mt-4">
+        <div class="col-12 md:col-3">
+          <div class="p-card text-center bg-blue-50">
+            <i class="pi pi-send text-blue-600" style="font-size: 2rem;"></i>
+            <h3 class="mt-2 mb-0 text-blue-900">{{ estadisticas.totalEnvios }}</h3>
+            <p class="text-600 m-0">Total Envíos</p>
+          </div>
+        </div>
+        <div class="col-12 md:col-3">
+          <div class="p-card text-center bg-green-50">
+            <i class="pi pi-check-circle text-green-600" style="font-size: 2rem;"></i>
+            <h3 class="mt-2 mb-0 text-green-900">{{ estadisticas.enviosExitosos }}</h3>
+            <p class="text-600 m-0">Exitosos</p>
+          </div>
+        </div>
+        <div class="col-12 md:col-3">
+          <div class="p-card text-center bg-red-50">
+            <i class="pi pi-times-circle text-red-600" style="font-size: 2rem;"></i>
+            <h3 class="mt-2 mb-0 text-red-900">{{ estadisticas.enviosFallidos }}</h3>
+            <p class="text-600 m-0">Fallidos</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 🔍 Filtros y búsqueda -->
+      <div class="flex justify-content-between align-items-center mt-4 mb-3">
+        <div class="flex gap-2">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input 
+              type="text" 
+              pInputText 
+              [(ngModel)]="busquedaGlobal"
+              (input)="aplicarFiltros()"
+              placeholder="Buscar socio..." 
+              class="w-full" />
+          </span>
+        </div>
+
+        <div class="flex gap-2">
+          <p-selectButton 
+            [options]="[
+              {label: 'Todos', value: 'TODOS'},
+              {label: 'Activos', value: 'ACTIVOS'},
+              {label: 'Inactivos', value: 'INACTIVOS'}
+            ]" 
+            [(ngModel)]="filtroEstado"
+            (onChange)="aplicarFiltros()"
+            optionLabel="label"
+            optionValue="value">
+          </p-selectButton>
+        </div>
+      </div>
+
+      <!-- 📋 Tabla de socios con créditos -->
+      <div class="tabla-socios-full mt-4">
+        <p-table
+          [value]="sociosFiltrados"
+          [paginator]="true"
+          [rows]="10"
+          [loading]="loading"
+          responsiveLayout="scroll"
+          class="shadow-2 border-round"
+          [rowHover]="true"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} socios">
+          
+          <ng-template pTemplate="caption">
+            <div class="flex justify-content-between align-items-center">
+              <span class="text-xl font-bold text-900">
+                📋 Socios con Créditos Activos ({{ sociosFiltrados.length }})
+              </span>
+              <p-button 
+                label="Agregar Socio" 
+                icon="pi pi-user-plus"
+                class="p-button-success"
+                (onClick)="abrirDialogNuevo()">
+              </p-button>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="numeroSocio">
+                Nº Socio
+                <p-sortIcon field="numeroSocio"></p-sortIcon>
+              </th>
+              <th pSortableColumn="nombre">
+                Nombre Completo
+                <p-sortIcon field="nombre"></p-sortIcon>
+              </th>
+              <th pSortableColumn="telefono">
+                Teléfono
+                <p-sortIcon field="telefono"></p-sortIcon>
+              </th>
+              <th pSortableColumn="email">
+                Email
+                <p-sortIcon field="email"></p-sortIcon>
+              </th>
+              <th pSortableColumn="fechaVencimientoPago">
+                Fecha Vencimiento
+                <p-sortIcon field="fechaVencimientoPago"></p-sortIcon>
+              </th>
+              <th pSortableColumn="estado">
+                Estado
+                <p-sortIcon field="estado"></p-sortIcon>
+              </th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-socio>
+            <tr>
+              <td>
+                <span class="font-semibold">{{ socio.numeroSocio }}</span>
+              </td>
+              <td>
+                <span class="font-semibold">{{ socio.nombre }} {{ socio.apellidoPaterno }} {{ socio.apellidoMaterno }}</span>
+              </td>
+              <td>
+                <i class="pi pi-phone mr-2"></i>
+                {{ socio.telefono }}
+              </td>
+              <td>
+                <i class="pi pi-envelope mr-2"></i>
+                {{ socio.email }}
+              </td>
+              <td>
+                <span class="text-600">
+                  {{ formatearFecha(socio.fechaVencimientoPago) }}
+                </span>
+              </td>
+              <td>
+                <p-tag 
+                  [value]="getEstadoTexto(socio.estado)" 
+                  [severity]="getEstadoBadge(socio.estado)">
+                </p-tag>
+              </td>
+              <td class="text-center">
+                <div class="flex gap-2 justify-content-center">
+                  <p-button
+                    icon="pi pi-send"
+                    styleClass="p-button-sm p-button-rounded p-button-primary"
+                    (onClick)="enviarRecordatorio(socio)"
+                    [loading]="loadingEnvio"
+                    pTooltip="Enviar recordatorio"
+                    tooltipPosition="top">
+                  </p-button>
+                  <p-button
+                    icon="pi pi-history"
+                    styleClass="p-button-sm p-button-rounded p-button-info"
+                    (onClick)="verHistorial(socio)"
+                    pTooltip="Ver historial"
+                    tooltipPosition="top">
+                  </p-button>
+                  <p-button
+                    icon="pi pi-pencil"
+                    styleClass="p-button-sm p-button-rounded p-button-warning"
+                    (onClick)="abrirDialogEditar(socio)"
+                    pTooltip="Editar"
+                    tooltipPosition="top">
+                  </p-button>
+                  <p-button
+                    [icon]="socio.estado ? 'pi pi-times' : 'pi pi-check'"
+                    [styleClass]="'p-button-sm p-button-rounded ' + (socio.estado ? 'p-button-danger' : 'p-button-success')"
+                    (onClick)="cambiarEstado(socio)"
+                    [pTooltip]="socio.estado ? 'Desactivar' : 'Activar'"
+                    tooltipPosition="top">
+                  </p-button>
+                  <p-button
+                    icon="pi pi-trash"
+                    styleClass="p-button-sm p-button-rounded p-button-danger"
+                    (onClick)="eliminarSocio(socio)"
+                    pTooltip="Eliminar"
+                    tooltipPosition="top">
+                  </p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7" class="text-center p-5">
+                <div class="flex flex-column align-items-center gap-3">
+                  <i class="pi pi-inbox" style="font-size: 3rem; color: #94a3b8;"></i>
+                  <p class="text-600 font-semibold text-xl m-0">
+                    No hay socios registrados
+                  </p>
+                  <p class="text-500 m-0">Comience agregando un nuevo socio</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 📝 DIALOG: Agregar/Editar Socio -->
+<p-dialog 
+  [header]="esEdicion ? 'Editar Socio' : 'Nuevo Socio'"
+  [(visible)]="displayDialog"
+  [modal]="true"
+  [style]="{ width: '600px' }"
+  [draggable]="false"
+  [resizable]="false">
+  
+  <div class="p-fluid">
+    <div class="grid">
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <label for="numeroSocio">Número de Socio *</label>
+          <input 
+            id="numeroSocio" 
+            type="text" 
+            pInputText 
+            [(ngModel)]="socioForm.numeroSocio"
+            [disabled]="esEdicion" />
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <label for="nombre">Nombre *</label>
+          <input 
+            id="nombre" 
+            type="text" 
+            pInputText 
+            [(ngModel)]="socioForm.nombre" />
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <label for="apellidoPaterno">Apellido Paterno *</label>
+          <input 
+            id="apellidoPaterno" 
+            type="text" 
+            pInputText 
+            [(ngModel)]="socioForm.apellidoPaterno" />
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <label for="apellidoMaterno">Apellido Materno</label>
+          <input 
+            id="apellidoMaterno" 
+            type="text" 
+            pInputText 
+            [(ngModel)]="socioForm.apellidoMaterno" />
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <label for="telefono">Teléfono (con código país) *</label>
+          <input 
+            id="telefono" 
+            type="text" 
+            pInputText 
+            [(ngModel)]="socioForm.telefono"
+            placeholder="Ej: 59175123456" />
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <label for="email">Email *</label>
+          <input 
+            id="email" 
+            type="email" 
+            pInputText 
+            [(ngModel)]="socioForm.email" />
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <label for="fechaVencimiento">Fecha de Vencimiento *</label>
+          <p-datepicker 
+            [(ngModel)]="fechaVencimientoDate"
+            [showIcon]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="Seleccione fecha">
+          </p-datepicker>
+        </div>
+      </div>
+
+      <div class="col-12 md:col-6">
+        <div class="field">
+          <label for="estado">Estado</label>
+          <p-checkbox 
+            [(ngModel)]="socioForm.estado"
+            [binary]="true"
+            label="Activo">
+          </p-checkbox>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancelar" 
+      icon="pi pi-times" 
+      (onClick)="cerrarDialog()"
+      styleClass="p-button-text">
+    </p-button>
+    <p-button 
+      label="Guardar" 
+      icon="pi pi-check" 
+      (onClick)="guardarSocio()"
+      [loading]="loading">
+    </p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- 📜 DIALOG: Historial de Envíos -->
+<p-dialog 
+  header="Historial de Envíos"
+  [(visible)]="displayHistorialDialog"
+  [modal]="true"
+  [style]="{ width: '800px' }"
+  [draggable]="false">
+  
+  <div *ngIf="socioSeleccionado" class="mb-3">
+    <h4 class="m-0">{{ socioSeleccionado.nombre }} {{ socioSeleccionado.apellidoPaterno }}</h4>
+    <p class="text-600 m-0">Teléfono: {{ socioSeleccionado.telefono }}</p>
+  </div>
+
+  <p-table 
+    [value]="historialEnvios"
+    [paginator]="true"
+    [rows]="5"
+    responsiveLayout="scroll">
+    
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Fecha/Hora</th>
+        <th>Estado</th>
+        <th>Mensaje</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-registro>
+      <tr>
+        <td>{{ formatearFechaHora(registro.fechaEnvio) }}</td>
+        <td>
+          <p-tag 
+            [value]="registro.estado" 
+            [severity]="getEstadoEnvioBadge(registro.estado)">
+          </p-tag>
+        </td>
+        <td>
+          <div *ngIf="registro.estado === 'EXITOSO'">
+            {{ registro.mensaje }}
+          </div>
+          <div *ngIf="registro.estado === 'FALLIDO'" class="text-red-600">
+            {{ registro.mensajeError }}
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="3" class="text-center p-4">
+          No hay registros de envíos
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-dialog>
+
+<!-- 📤 DIALOG: Envío Masivo -->
+<p-dialog 
+  header="Envío Masivo de Recordatorios"
+  [(visible)]="displayEnvioMasivoDialog"
+  [modal]="true"
+  [style]="{ width: '700px' }"
+  [draggable]="false">
+  
+  <div class="p-card mb-3 bg-blue-50">
+    <h4>⚡ Próximos Envíos Programados</h4>
+    <div *ngIf="proximosEnvios">
+      <p><strong>Total a enviar:</strong> {{ proximosEnvios.total }}</p>
+      <p><strong>Hoy:</strong> {{ proximosEnvios.hoy }}</p>
+      <p><strong>Esta semana:</strong> {{ proximosEnvios.semana }}</p>
+      <p><strong>Este mes:</strong> {{ proximosEnvios.mes }}</p>
+    </div>
+  </div>
+
+  <p-message 
+    severity="warn" 
+    text="Esta acción enviará recordatorios a todos los socios con pagos pendientes. ¿Desea continuar?">
+  </p-message>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancelar" 
+      icon="pi pi-times" 
+      (onClick)="displayEnvioMasivoDialog = false"
+      styleClass="p-button-text">
+    </p-button>
+    <p-button 
+      label="Ejecutar Envío" 
+      icon="pi pi-send" 
+      (onClick)="ejecutarEnvioMasivo()"
+      [loading]="loadingEnvio"
+      styleClass="p-button-primary">
+    </p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- 📱 DIALOG: Test de Mensaje -->
+<p-dialog 
+  header="Enviar Mensaje de Prueba"
+  [(visible)]="displayTestDialog"
+  [modal]="true"
+  [style]="{ width: '500px' }"
+  [draggable]="false">
+  
+  <div class="p-fluid">
+    <div class="field">
+      <label for="numeroTest">Número de Teléfono (con código país)</label>
+      <input 
+        id="numeroTest" 
+        type="text" 
+        pInputText 
+        [(ngModel)]="numeroTest"
+        placeholder="Ej: 59175123456" />
+    </div>
+
+    <div class="field">
+      <label for="mensajeTest">Mensaje</label>
+      <textarea 
+        id="mensajeTest"
+        pInputTextarea
+        [(ngModel)]="mensajeTest"
+        [rows]="5">
+      </textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button 
+      label="Cancelar" 
+      icon="pi pi-times" 
+      (onClick)="displayTestDialog = false"
+      styleClass="p-button-text">
+    </p-button>
+    <p-button 
+      label="Enviar" 
+      icon="pi pi-send" 
+      (onClick)="enviarMensajePrueba()"
+      [loading]="loadingEnvio">
+    </p-button>
+  </ng-template>
+</p-dialog>
+
+<!-- 📊 DIALOG: Todos los Registros -->
+<p-dialog 
+  header="📋 Registros de Envíos"
+  [(visible)]="displayRegistrosDialog"
+  [modal]="true"
+  [style]="{ width: '90vw', height: '80vh' }"
+  [draggable]="false"
+  [maximizable]="true">
+  
+  <!-- Filtros -->
+  <div class="grid mb-3">
+    <div class="col-12 md:col-4">
+      <span class="p-input-icon-left w-full">
+        <i class="pi pi-search"></i>
+        <input 
+          type="text" 
+          pInputText 
+          [(ngModel)]="busquedaRegistro"
+          (input)="aplicarFiltrosRegistros()"
+          placeholder="Buscar..."
+          class="w-full" />
+      </span>
+    </div>
+
+    <div class="col-12 md:col-3">
+      <p-selectButton 
+        [options]="[
+          {label: 'Todos', value: 'TODOS'},
+          {label: 'Exitosos', value: 'EXITOSO'},
+          {label: 'Fallidos', value: 'FALLIDO'}
+        ]" 
+        [(ngModel)]="filtroEstadoRegistro"
+        (onChange)="aplicarFiltrosRegistros()"
+        optionLabel="label"
+        optionValue="value">
+      </p-selectButton>
+    </div>
+
+    <div class="col-12 md:col-3">
+      <p-datepicker 
+        [(ngModel)]="rangoFechas"
+        selectionMode="range"
+        [showIcon]="true"
+        (onSelect)="aplicarFiltrosRegistros()"
+        placeholder="Rango de fechas"
+        dateFormat="dd/mm/yy">
+      </p-datepicker>
+    </div>
+
+    <div class="col-12 md:col-2">
+      <div class="flex gap-2">
+        <p-button 
+          icon="pi pi-filter-slash"
+          (onClick)="limpiarFiltrosRegistros()"
+          pTooltip="Limpiar filtros"
+          styleClass="p-button-outlined">
+        </p-button>
+        <p-button 
+          icon="pi pi-download"
+          (onClick)="exportarRegistrosCSV()"
+          pTooltip="Exportar CSV"
+          styleClass="p-button-success">
+        </p-button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de registros -->
+  <p-table 
+    [value]="registrosFiltrados"
+    [paginator]="true"
+    [rows]="10"
+    [loading]="loadingRegistros"
+    responsiveLayout="scroll"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
+    
+    <ng-template pTemplate="header">
+      <tr>
+        <th pSortableColumn="fechaEnvio">
+          Fecha/Hora
+          <p-sortIcon field="fechaEnvio"></p-sortIcon>
+        </th>
+        <th>Número</th>
+        <th pSortableColumn="estado">
+          Estado
+          <p-sortIcon field="estado"></p-sortIcon>
+        </th>
+        <th>Mensaje</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-registro>
+      <tr>
+        <td>{{ formatearFechaHora(registro.fechaEnvio) }}</td>
+        <td>
+          <i class="pi pi-phone mr-2"></i>
+          {{ registro.numeroDestino }}
+        </td>
+        <td>
+          <p-tag 
+            [value]="registro.estado" 
+            [severity]="getEstadoEnvioBadge(registro.estado)">
+          </p-tag>
+        </td>
+        <td>
+          <div *ngIf="registro.estado === 'EXITOSO'" class="text-sm">
+            {{ registro.mensaje }}
+          </div>
+          <div *ngIf="registro.estado === 'FALLIDO'" class="text-red-600 text-sm">
+            {{ registro.mensajeError }}
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="4" class="text-center p-4">
+          <i class="pi pi-inbox" style="font-size: 2rem; color: #94a3b8;"></i>
+          <p class="text-600 mt-2 mb-0">No hay registros disponibles</p>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="summary">
+      <div class="flex justify-content-between align-items-center">
+        <span>Total de registros: <strong>{{ registrosFiltrados.length }}</strong></span>
+      </div>
+    </ng-template>
+  </p-table>
+</p-dialog>
+
+<!-- Toast y ConfirmDialog -->
+<p-toast position="top-right"></p-toast>
+<p-confirmDialog></p-confirmDialog>
