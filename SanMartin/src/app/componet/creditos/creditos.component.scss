@@ -1,0 +1,452 @@
+/* =====================================================
+   1. VARIABLES DEL TEMA – MODO CLARO Y OSCURO (SAKAI)
+===================================================== */
+
+:root[data-theme="light"] {
+  --surface-ground: #f4f4f4;
+  --surface-card: #ffffff;
+  --surface-border: #e0e0e0;
+  --surface-hover: #f9f9f9;
+
+  --text-color: #2e2e2e;
+  --text-secondary: #555;
+
+  --primary-color: #0d89ec;
+  --primary-color-text: #ffffff;
+
+  --success-color: #4caf50;
+  --danger-color: #e53935;
+  --warning-color: #ffb300;
+}
+
+:root[data-theme="dark"] {
+  --surface-ground: #1f1f1f;
+  --surface-card: #2a2a2a;
+  --surface-border: #3a3a3a;
+  --surface-hover: #333;
+
+  --text-color: #e6e6e6;
+  --text-secondary: #cfcfcf;
+
+  --primary-color: #4da3ff;
+  --primary-color-text: #0d0d0d;
+
+  --success-color: #81c784;
+  --danger-color: #ef5350;
+  --warning-color: #ffca28;
+}
+
+/* Transiciones suaves */
+:root[data-theme="light"],
+:root[data-theme="dark"] {
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+
+/* =====================================================
+   2. ESTILOS GLOBALES ADAPTADOS A LOS DOS MODOS
+===================================================== */
+
+body {
+  background: var(--surface-ground);
+  color: var(--text-color);
+  transition: background 0.3s, color 0.3s;
+}
+
+.card,
+.p-card,
+.contenedor-reportes,
+.tabla-socios-full,
+.vista-previa-movil {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  color: var(--text-color);
+  transition: 0.3s ease;
+}
+
+/* Inputs */
+input,
+textarea,
+select,
+.p-inputtext {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  color: var(--text-color);
+}
+
+i,
+.pi {
+  color: var(--text-color);
+}
+
+
+/* =====================================================
+   3. TÍTULO PRINCIPAL Y ORGANIZACIÓN DEL LAYOUT
+===================================================== */
+
+.titulo-principal-container {
+  margin-bottom: 1rem;
+  
+  .titulo-recordatorio {
+    margin: 0;
+    color: var(--text-color);
+    font-size: 1.75rem;
+  }
+}
+
+/* Botones de acción debajo del título */
+.botones-accion-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+  width: 100%;
+  
+  button {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+  }
+}
+
+/* Estadísticas debajo de los botones */
+.estadisticas-container {
+  margin-top: 1.5rem;
+  margin-bottom: 2rem;
+  
+  .estadistica-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    h3 {
+      font-size: 2rem;
+      margin: 0.5rem 0;
+    }
+    
+    p {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+  }
+}
+
+
+/* =====================================================
+   4. ENCABEZADO Y FILTROS
+===================================================== */
+
+.encabezado-recordatorio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+
+  h3 {
+    margin: 0;
+    color: var(--text-color);
+  }
+}
+
+.botones-derecha {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  button {
+    display: flex;
+    align-items: center;
+  }
+}
+
+.filtros-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+
+  .filtro {
+    display: flex;
+    align-items: center;
+
+    label {
+      margin-right: 8px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+  }
+}
+
+.btn-green {
+  background: #00c174 !important;
+  border: none !important;
+  color: white !important;
+  border-radius: 8px !important;
+  padding: 0.6rem 1.2rem !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.btn-green:hover {
+  background: #00a864 !important;
+}
+
+.header-buttons {
+  display: flex;
+  width: 100%;
+}
+
+.rojo {
+  color: red;
+  font-weight: bold;
+}
+
+.amarillo {
+  color: orange;
+  font-weight: bold;
+}
+
+.verde {
+  color: green;
+  font-weight: bold;
+}
+
+
+/* =====================================================
+   5. BOTONES PRIME NG (COMPATIBLES MODO OSC/CLR)
+===================================================== */
+
+.p-button {
+  background: var(--primary-color) !important;
+  color: var(--primary-color-text) !important;
+  border: none !important;
+}
+
+.p-button.p-button-outlined {
+  border: 1px solid var(--primary-color) !important;
+  color: var(--primary-color) !important;
+}
+
+.p-button.p-button-text {
+  background: transparent !important;
+  color: var(--primary-color) !important;
+}
+
+
+/* =====================================================
+   6. TABLA DE SOCIOS (TOTALMENTE ADAPTADA)
+===================================================== */
+
+.tabla-socios-full {
+  width: 100%;
+  border-radius: 10px;
+  padding: 20px;
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th {
+      background: var(--surface-ground);
+      padding: 12px;
+      text-align: left;
+      font-weight: bold;
+      color: var(--text-color);
+      border-bottom: 2px solid var(--surface-border);
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid var(--surface-border);
+      color: var(--text-color);
+    }
+
+    tr:hover {
+      background: var(--surface-hover);
+    }
+  }
+}
+
+.estado-activo {
+  color: var(--success-color);
+  font-weight: bold;
+}
+
+.estado-inactivo {
+  color: var(--danger-color);
+  font-weight: bold;
+}
+
+
+/* =====================================================
+   7. VISTA PREVIA MOVIL DEL MENSAJE
+===================================================== */
+
+.vista-previa-movil {
+  width: 380px;
+  margin: auto;
+  border-radius: 10px;
+  padding: 15px;
+
+  header {
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    background: var(--surface-ground);
+    padding: 8px;
+    border-radius: 8px;
+  }
+
+  .cuerpo {
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-line;
+  }
+}
+
+
+/* =====================================================
+   8. SECCIÓN DE REPORTES
+===================================================== */
+
+.reporte-completo {
+  padding: 20px;
+  border-radius: 8px;
+  margin-top: 25px;
+
+  h4 {
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+}
+
+.contenedor-reportes {
+  padding: 20px;
+  border-radius: 10px;
+  background: var(--surface-ground);
+  border: 1px solid var(--surface-border);
+}
+
+
+/* =====================================================
+   9. RESPONSIVE
+===================================================== */
+
+@media (max-width: 768px) {
+  .titulo-principal-container {
+    text-align: center;
+    
+    .titulo-recordatorio {
+      font-size: 1.5rem;
+    }
+  }
+  
+  .botones-accion-container {
+    justify-content: center;
+    
+    button {
+      flex: 1 1 auto;
+      min-width: 140px;
+    }
+  }
+  
+  .estadisticas-container {
+    .col-12 {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .encabezado-recordatorio {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .filtros-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .vista-previa-movil {
+    width: 100%;
+  }
+}
+
+
+/* =====================================================
+   10. IMPRESIÓN
+===================================================== */
+
+@media print {
+  .botones-derecha,
+  .botones-accion-container,
+  .filtros-container,
+  .acciones-columna {
+    display: none !important;
+  }
+
+  .vista-previa-movil {
+    border: none;
+    width: 100%;
+  }
+}
+
+
+/* =====================================================
+   11. ANIMACIONES
+===================================================== */
+
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.verde {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+.amarillo {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.rojo {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.p-card {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.p-datatable {
+  .p-datatable-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+  }
+}

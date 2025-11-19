@@ -1,5 +1,6 @@
 package bo.sanmartin.creditos.controller;
 
+import bo.sanmartin.creditos.dto.RegistroEnvioDTO;
 import bo.sanmartin.creditos.dto.SocioDTO;
 import bo.sanmartin.creditos.mapper.SocioMapper;
 import bo.sanmartin.creditos.model.RegistroEnvio;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/socios")
@@ -30,6 +33,7 @@ public class SocioController {
     private final RegistroEnvioRepository registroEnvioRepository;
     private final NotificacionScheduler notificacionScheduler;
     private final SocioMapper socioMapper; // ← NUEVO
+
     
     @PostMapping
     public ResponseEntity<?> registrarSocio(@Valid @RequestBody SocioDTO socioDTO) {
@@ -162,28 +166,134 @@ public class SocioController {
     
     // Endpoints para mensajería
     
-    @PostMapping("/{id}/enviar-recordatorio")
-    public ResponseEntity<?> enviarRecordatorioManual(@PathVariable Long id) {
-        return socioService.obtenerSocioPorId(id)
-            .map(socio -> {
-                RegistroEnvio registro = whatsAppService.enviarRecordatorioPago(socio);
-                return ResponseEntity.ok(registro);
-            })
-            .orElse(ResponseEntity.notFound().build());
+@PostMapping("/{id}/enviar-recordatorio")
+public ResponseEntity<RegistroEnvioDTO> enviarRecordatorioManual(@PathVariable Long id) {
+    return socioService.obtenerSocioPorId(id)
+        .map(socio -> {
+            RegistroEnvio registro = whatsAppService.enviarRecordatorioPago(socio);
+            return ResponseEntity.ok(convertirADTO(registro));
+        })
+        .orElse(ResponseEntity.notFound().build());
+}
+
+private RegistroEnvioDTO convertirADTO(RegistroEnvio registro) {
+    RegistroEnvioDTO dto = new RegistroEnvioDTO();
+    dto.setId(registro.getId());
+    dto.setFechaEnvio(registro.getFechaEnvio().toString());
+    dto.setNumeroDestino(registro.getNumeroDestino());
+    dto.setMensaje(registro.getMensaje());
+    dto.setEstado(registro.getEstado().name());
+    dto.setMensajeError(registro.getMensajeError());
+    dto.setIdExterno(registro.getIdExterno());
+
+    if (registro.getSocio() != null) {
+        dto.setSocioId(registro.getSocio().getId());
+        dto.setNombreSocio(registro.getSocio().getNombreCompleto());
     }
     
+    return dto;
+}
+  
+ // Agregar DESPUÉS del método enviarRecordatorioManual
+@PostMapping("/enviar-mensaje-prueba")
+public ResponseEntity<?> enviarMensajePrueba(@RequestBody Map<String, String> datos) {
+    try {
+        String numero = datos.get("numero");
+        String mensaje = datos.get("mensaje");
+        
+        log.info("📤 Enviando mensaje de prueba a: {}", numero);
+        
+        // 1. Enviar el mensaje
+        boolean enviado = whatsAppService.enviarMensaje(numero, mensaje);
+        
+        // 2. Crear y guardar el registro
+        RegistroEnvio registro = new RegistroEnvio();
+        registro.setNumeroDestino(numero);
+        registro.setMensaje(mensaje);
+        registro.setFechaEnvio(java.time.LocalDateTime.now());
+        registro.setEstado(enviado ? 
+            RegistroEnvio.EstadoEnvio.EXITOSO : 
+            RegistroEnvio.EstadoEnvio.FALLIDO);
+        
+        // Intentar buscar y asociar el socio por número de teléfono
+        try {
+            String numeroBusqueda = numero.replaceAll("[^0-9]", "");
+            
+            // Buscar por el campo 'telefono' que ya tienes en Socio
+            Socio socio = socioService.obtenerTodosLosSocios().stream()
+                .filter(s -> s.getTelefono().contains(numeroBusqueda) || 
+                            numeroBusqueda.contains(s.getTelefono()))
+                .findFirst()
+                .orElse(null);
+            
+            if (socio != null) {
+                registro.setSocio(socio);
+                log.info("✅ Mensaje asociado al socio: {}", socio.getNombreCompleto());
+            } else {
+                log.warn("⚠️ No se encontró socio con el número: {}", numero);
+            }
+        } catch (Exception e) {
+            log.warn("⚠️ No se pudo asociar el mensaje a un socio: {}", e.getMessage());
+        }
+        
+        // Guardar el registro en la base de datos
+        RegistroEnvio registroGuardado = registroEnvioRepository.save(registro);
+        
+        log.info("✅ Mensaje enviado y registrado con ID: {}", registroGuardado.getId());
+        
+        return ResponseEntity.ok(convertirADTO(registroGuardado));
+        
+    } catch (Exception e) {
+        log.error("❌ Error al enviar mensaje de prueba", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(crearRespuestaError("Error al enviar mensaje: " + e.getMessage()));
+    }
+}
+
     @PostMapping("/ejecutar-envio-programado")
     public ResponseEntity<?> ejecutarEnvioProgramadoManual() {
         notificacionScheduler.ejecutarEnvioManual();
         return ResponseEntity.ok(crearRespuestaExito("Proceso de envío iniciado"));
     }
     
-    @GetMapping("/{id}/historial-envios")
-    public ResponseEntity<List<RegistroEnvio>> obtenerHistorialEnvios(@PathVariable Long id) {
+   // @GetMapping("/{id}/historial-envios")
+   // public ResponseEntity<List<RegistroEnvio>> obtenerHistorialEnvios(@PathVariable Long id) {
+   //     List<RegistroEnvio> registros = registroEnvioRepository
+   //         .findBySocioIdOrderByFechaEnvioDesc(id);
+   //     return ResponseEntity.ok(registros);
+   // }
+   // SocioController.java - Método corregido
+@GetMapping("/{id}/historial-envios")
+public ResponseEntity<List<RegistroEnvioDTO>> obtenerHistorialEnvios(@PathVariable Long id) {
+    try {
+        Socio socio = socioService.obtenerSocioPorId(id)
+            .orElseThrow(() -> new RuntimeException("Socio no encontrado"));
+        
+        // Usar el repositorio directamente
         List<RegistroEnvio> registros = registroEnvioRepository
             .findBySocioIdOrderByFechaEnvioDesc(id);
-        return ResponseEntity.ok(registros);
+        
+        // Convertir a DTO para evitar recursión circular
+        List<RegistroEnvioDTO> registrosDTO = registros.stream()
+            .map(registro -> new RegistroEnvioDTO(
+                registro.getId(),
+                socio.getId(),
+                socio.getNombre() + " " + socio.getApellidoPaterno(),
+                registro.getFechaEnvio().toString(),
+                registro.getNumeroDestino(),
+                registro.getMensaje(),
+                registro.getEstado().name(), // ← Convertir enum a String
+                registro.getMensajeError(),
+                registro.getIdExterno()
+            ))
+            .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(registrosDTO);
+    } catch (Exception e) {
+        log.error("❌ Error al obtener historial de envíos", e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+}
     
     @GetMapping("/estadisticas-envios")
     public ResponseEntity<?> obtenerEstadisticasEnvios() {

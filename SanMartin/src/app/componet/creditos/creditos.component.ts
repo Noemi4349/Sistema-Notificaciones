@@ -1,9 +1,7 @@
-// src/app/component/creditos/creditos.component.ts - SIN TABVIEW
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CreditosService, Socio, RegistroEnvio, EstadisticasEnvio, SchedulerStatus } from 'src/app/service/creditos.service';
+import { CreditosService, Socio, RegistroEnvio, EstadisticasEnvio, ConfiguracionScheduler } from 'src/app/service/creditos.service';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
 // PrimeNG Imports
@@ -23,6 +21,7 @@ import { DatePickerModule } from 'primeng/datepicker';
 import { TextareaModule } from 'primeng/textarea';
 import { MessageModule } from 'primeng/message';
 import { CardModule } from 'primeng/card';
+import { InputNumberModule } from 'primeng/inputnumber';
 
 @Component({
   selector: 'app-creditos',
@@ -33,6 +32,7 @@ import { CardModule } from 'primeng/card';
     TableModule,
     ButtonModule,
     InputTextModule,
+    InputNumberModule,
     DialogModule,
     ToolbarModule,
     ToastModule,
@@ -87,20 +87,22 @@ export class CreditosComponent implements OnInit, OnDestroy {
   loading: boolean = false;
   loadingEnvio: boolean = false;
   loadingRegistros: boolean = false;
+  loadingConfiguracion: boolean = false;
   
   // Filtros
   filtroEstado: string = 'TODOS';
   busquedaGlobal: string = '';
 
-  // ========== NUEVO: Programación automática ==========
-  schedulerStatus: SchedulerStatus | null = null;
-  schedulerActivo: boolean = false;
+  // ========== NUEVO: Configuración del Scheduler ==========
+  configuracionScheduler: ConfiguracionScheduler | null = null;
   horaEnvio: number = 9;
   minutoEnvio: number = 0;
-  intervaloChequeo: any = null;
+  schedulerActivo: boolean = false;
+  diasAnticipacion: number = 1;
+  intervaloMonitoreo: any = null;
   tiempoRestante: string = '';
   
-  // ========== NUEVO: Registros de envío ==========
+  // ========== Registros de envío ==========
   todosLosRegistros: RegistroEnvio[] = [];
   registrosFiltrados: RegistroEnvio[] = [];
   filtroEstadoRegistro: string = 'TODOS';
@@ -118,113 +120,209 @@ export class CreditosComponent implements OnInit, OnDestroy {
     this.cargarSocios();
     this.cargarEstadisticas();
     this.cargarProximosEnvios();
-    this.cargarSchedulerStatus();
+    this.cargarConfiguracionScheduler();
     this.cargarTodosLosRegistros();
   }
 
   ngOnDestroy() {
-    this.detenerMonitoreoAutomatico();
+    this.detenerMonitoreoTiempo();
   }
 
-  // ========== NUEVO: Funciones de Programación Automática ==========
+  // ========== NUEVO: Funciones de Configuración del Scheduler ==========
 
-  cargarSchedulerStatus() {
-    this.creditosService.obtenerStatusScheduler().subscribe({
-      next: (status) => {
-        this.schedulerStatus = status;
-        console.log('⏰ Status del scheduler:', status);
+  cargarConfiguracionScheduler() {
+    console.log('⚙️ Cargando configuración del scheduler...');
+    this.loadingConfiguracion = true;
+    
+    this.creditosService.obtenerConfiguracionScheduler().subscribe({
+      next: (config) => {
+        console.log('✅ Configuración cargada:', config);
+        this.configuracionScheduler = config;
+        this.horaEnvio = config.hora;
+        this.minutoEnvio = config.minuto;
+        this.schedulerActivo = config.activo;
+        this.diasAnticipacion = config.diasAnticipacion || 1;
+        this.loadingConfiguracion = false;
+        
+        // Iniciar monitoreo de tiempo si está activo
+        if (this.schedulerActivo) {
+          this.iniciarMonitoreoTiempo();
+        }
       },
       error: (error) => {
-        console.error('Error al cargar status del scheduler', error);
+        console.error('❌ Error al cargar configuración:', error);
+        this.mostrarError('Error al cargar configuración del scheduler');
+        this.loadingConfiguracion = false;
       }
     });
   }
 
-  abrirConfiguracion() {
+  abrirConfiguracionScheduler() {
+    this.cargarConfiguracionScheduler();
     this.displayConfiguracionDialog = true;
   }
 
-  guardarConfiguracion() {
-    console.log('💾 Configuración guardada:', { hora: this.horaEnvio, minuto: this.minutoEnvio });
-    this.mostrarExito('Configuración actualizada. Los envíos se realizarán a las ' + 
-                      this.formatearHora(this.horaEnvio, this.minutoEnvio));
-    this.displayConfiguracionDialog = false;
-    
-    if (this.schedulerActivo) {
-      this.detenerMonitoreoAutomatico();
-      this.iniciarMonitoreoAutomatico();
+  guardarConfiguracionScheduler() {
+    // Validar datos
+    if (this.horaEnvio < 0 || this.horaEnvio > 23) {
+      this.mostrarAdvertencia('La hora debe estar entre 0 y 23');
+      return;
     }
-  }
-
-  iniciarMonitoreoAutomatico() {
-    if (this.intervaloChequeo) {
+    
+    if (this.minutoEnvio < 0 || this.minutoEnvio > 59) {
+      this.mostrarAdvertencia('Los minutos deben estar entre 0 y 59');
       return;
     }
 
-    this.schedulerActivo = true;
-    console.log('▶️ Iniciando monitoreo automático...');
-    
-    this.intervaloChequeo = setInterval(() => {
-      this.verificarHoraEnvio();
-      this.calcularTiempoRestante();
-    }, 60000);
+    console.log('💾 Guardando configuración del scheduler...');
+    this.loadingConfiguracion = true;
 
-    this.calcularTiempoRestante();
-    
-    this.mostrarExito('Monitoreo automático iniciado. Envíos programados a las ' + 
-                     this.formatearHora(this.horaEnvio, this.minutoEnvio));
-  }
+    const configuracion: ConfiguracionScheduler = {
+      hora: this.horaEnvio,
+      minuto: this.minutoEnvio,
+      activo: this.schedulerActivo,
+      diasAnticipacion: this.diasAnticipacion,
+      modificadoPor: 'USUARIO'
+    };
 
-  detenerMonitoreoAutomatico() {
-    if (this.intervaloChequeo) {
-      clearInterval(this.intervaloChequeo);
-      this.intervaloChequeo = null;
-      this.schedulerActivo = false;
-      this.tiempoRestante = '';
-      console.log('⏸️ Monitoreo automático detenido');
-      this.mostrarAdvertencia('Monitoreo automático detenido');
+    this.creditosService.actualizarConfiguracionScheduler(configuracion).subscribe({
+    next: (response) => {
+      console.log('✅ Configuración guardada:', response);
+      this.configuracionScheduler = response;
+      this.loadingConfiguracion = false;
+      this.displayConfiguracionDialog = false;
+      
+      const horaFormateada = this.formatearHora(response.hora, response.minuto);
+      const dias = response.diasAnticipacion ?? 1; // <-- CAMBIO AQUÍ
+      
+      if (response.activo) {
+        this.mostrarExito(
+          `✅ Scheduler configurado correctamente.\n` +
+          `📅 Los recordatorios se enviarán automáticamente a las ${horaFormateada} ` +
+          `(${dias} día${dias > 1 ? 's' : ''} antes del vencimiento)` // <-- CAMBIO AQUÍ
+        );
+        this.iniciarMonitoreoTiempo();
+      } else {
+        this.mostrarAdvertencia('⏸️ Scheduler desactivado. Los envíos NO se ejecutarán automáticamente.');
+        this.detenerMonitoreoTiempo();
+      }
+      
+      this.cargarProximosEnvios();
+    },
+    error: (error) => {
+      console.error('❌ Error al guardar configuración:', error);
+      this.mostrarError('Error al guardar configuración: ' + (error.error?.error || error.message));
+      this.loadingConfiguracion = false;
     }
+  });
   }
 
-  verificarHoraEnvio() {
-    const ahora = new Date();
-    const horaActual = ahora.getHours();
-    const minutoActual = ahora.getMinutes();
-
-    console.log(`🕐 Verificando hora: ${horaActual}:${minutoActual} vs ${this.horaEnvio}:${this.minutoEnvio}`);
-
-    if (horaActual === this.horaEnvio && minutoActual === this.minutoEnvio) {
-      console.log('⏰ ¡HORA DE ENVÍO ALCANZADA! Ejecutando envío automático...');
-      this.ejecutarEnvioAutomatico();
-    }
-  }
-
-  ejecutarEnvioAutomatico() {
-    console.log('📤 Ejecutando envío automático...');
-    this.loadingEnvio = true;
+  activarScheduler() {
+    console.log('▶️ Activando scheduler...');
+    this.loadingConfiguracion = true;
     
-    this.creditosService.ejecutarEnvioManualScheduler().subscribe({
+    this.creditosService.activarScheduler().subscribe({
       next: (response) => {
-        console.log('✅ Envío automático ejecutado:', response);
-        this.mostrarExito('¡Envío automático ejecutado! Recordatorios enviados correctamente.');
-        this.loadingEnvio = false;
-        this.cargarEstadisticas();
-        this.cargarProximosEnvios();
-        this.cargarTodosLosRegistros();
+        console.log('✅ Scheduler activado:', response);
+        this.schedulerActivo = true;
+        this.loadingConfiguracion = false;
+        this.mostrarExito(response.mensaje);
+        this.cargarConfiguracionScheduler();
       },
       error: (error) => {
-        console.error('❌ Error en envío automático:', error);
-        this.mostrarError('Error en envío automático: ' + (error.error?.error || error.message));
-        this.loadingEnvio = false;
+        console.error('❌ Error al activar scheduler:', error);
+        this.mostrarError('Error al activar scheduler');
+        this.loadingConfiguracion = false;
       }
     });
   }
 
+  desactivarScheduler() {
+    console.log('⏸️ Desactivando scheduler...');
+    this.loadingConfiguracion = true;
+    
+    this.creditosService.desactivarScheduler().subscribe({
+      next: (response) => {
+        console.log('✅ Scheduler desactivado:', response);
+        this.schedulerActivo = false;
+        this.loadingConfiguracion = false;
+        this.mostrarAdvertencia(response.mensaje);
+        this.detenerMonitoreoTiempo();
+        this.cargarConfiguracionScheduler();
+      },
+      error: (error) => {
+        console.error('❌ Error al desactivar scheduler:', error);
+        this.mostrarError('Error al desactivar scheduler');
+        this.loadingConfiguracion = false;
+      }
+    });
+  }
+
+  ejecutarEnvioInmediato() {
+    this.confirmationService.confirm({
+      message: '¿Desea ejecutar el envío de recordatorios AHORA (sin esperar al horario programado)?',
+      header: 'Confirmación de Envío Inmediato',
+      icon: 'pi pi-exclamation-triangle',
+      acceptLabel: 'Sí, Ejecutar',
+      rejectLabel: 'Cancelar',
+      accept: () => {
+        console.log('🚀 Ejecutando envío inmediato...');
+        this.loadingEnvio = true;
+        
+        this.creditosService.ejecutarEnvioInmediato().subscribe({
+          next: (response) => {
+            console.log('✅ Envío ejecutado:', response);
+            this.mostrarExito(response.mensaje);
+            this.loadingEnvio = false;
+            this.cargarEstadisticas();
+            this.cargarProximosEnvios();
+            this.cargarTodosLosRegistros();
+          },
+          error: (error) => {
+            console.error('❌ Error al ejecutar envío:', error);
+            this.mostrarError('Error al ejecutar envío: ' + (error.error?.error || error.message));
+            this.loadingEnvio = false;
+          }
+        });
+      }
+    });
+  }
+
+  iniciarMonitoreoTiempo() {
+    // Detener monitoreo previo si existe
+    this.detenerMonitoreoTiempo();
+    
+    // Calcular tiempo restante cada minuto
+    this.intervaloMonitoreo = setInterval(() => {
+      this.calcularTiempoRestante();
+    }, 60000); // Cada 60 segundos
+    
+    // Calcular inmediatamente
+    this.calcularTiempoRestante();
+    
+    console.log('⏰ Monitoreo de tiempo iniciado');
+  }
+
+  detenerMonitoreoTiempo() {
+    if (this.intervaloMonitoreo) {
+      clearInterval(this.intervaloMonitoreo);
+      this.intervaloMonitoreo = null;
+      this.tiempoRestante = '';
+      console.log('⏸️ Monitoreo de tiempo detenido');
+    }
+  }
+
   calcularTiempoRestante() {
+    if (!this.schedulerActivo || !this.configuracionScheduler) {
+      this.tiempoRestante = '';
+      return;
+    }
+
     const ahora = new Date();
     const horaEnvioDate = new Date();
     horaEnvioDate.setHours(this.horaEnvio, this.minutoEnvio, 0, 0);
 
+    // Si la hora ya pasó hoy, calcular para mañana
     if (horaEnvioDate <= ahora) {
       horaEnvioDate.setDate(horaEnvioDate.getDate() + 1);
     }
@@ -240,36 +338,101 @@ export class CreditosComponent implements OnInit, OnDestroy {
     return `${hora.toString().padStart(2, '0')}:${minuto.toString().padStart(2, '0')}`;
   }
 
-  // ========== NUEVO: Funciones de Registros ==========
+  getTextoVencimiento(fechaVencimiento: string): string {
+    const hoy = new Date();
+    const fecha = new Date(fechaVencimiento);
+
+    hoy.setHours(0, 0, 0, 0);
+    fecha.setHours(0, 0, 0, 0);
+
+    const diffMs = fecha.getTime() - hoy.getTime();
+    const diffDias = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDias === 0) return "¡Vence HOY!";
+    if (diffDias === 1) return "Vence mañana";
+    if (diffDias > 1) return `Vence en ${diffDias} días`;
+    if (diffDias === -1) return "Vencido ayer";
+    return `Vencido hace ${Math.abs(diffDias)} días`;
+  }
+
+  getColorVencimiento(fecha: string): string {
+    const hoy = new Date();
+    const fechaV = new Date(fecha);
+
+    hoy.setHours(0, 0, 0, 0);
+    fechaV.setHours(0, 0, 0, 0);
+
+    if (fechaV < hoy) return "rojo";
+    if (fechaV.getTime() === hoy.getTime()) return "amarillo";
+    return "verde";
+  }
+
+  // ========== Funciones de Registros ==========
 
   cargarTodosLosRegistros() {
+    console.log('📄 Iniciando carga de todos los registros...');
     this.loadingRegistros = true;
     
     this.creditosService.obtenerTodosSocios().subscribe({
       next: (socios) => {
-        const promesas = socios.map(socio => 
-          this.creditosService.obtenerHistorialEnvios(socio.id!).toPromise()
-        );
-
-        Promise.all(promesas).then(resultados => {
-          this.todosLosRegistros = resultados
-            .filter(r => r !== undefined)
-            .flat() as RegistroEnvio[];
-          
-          this.todosLosRegistros.sort((a, b) => 
-            new Date(b.fechaEnvio).getTime() - new Date(a.fechaEnvio).getTime()
-          );
-
-          console.log('📋 Total registros cargados:', this.todosLosRegistros.length);
-          this.aplicarFiltrosRegistros();
+        console.log('👥 Socios obtenidos para registros:', socios.length);
+        
+        if (socios.length === 0) {
+          this.todosLosRegistros = [];
+          this.registrosFiltrados = [];
           this.loadingRegistros = false;
-        }).catch(error => {
-          console.error('Error al cargar registros:', error);
-          this.loadingRegistros = false;
+          return;
+        }
+
+        let registrosCompletos: RegistroEnvio[] = [];
+        let sociosProcesados = 0;
+
+        socios.forEach(socio => {
+          if (!socio.id) {
+            sociosProcesados++;
+            return;
+          }
+
+          this.creditosService.obtenerHistorialEnvios(socio.id).subscribe({
+            next: (historial) => {
+              const registrosConNombre = historial.map(reg => ({
+                ...reg,
+                nombreSocio: `${socio.nombre} ${socio.apellidoPaterno}`
+              }));
+              
+              registrosCompletos = [...registrosCompletos, ...registrosConNombre];
+              sociosProcesados++;
+
+              if (sociosProcesados === socios.length) {
+                this.todosLosRegistros = registrosCompletos.sort((a, b) => 
+                  new Date(b.fechaEnvio).getTime() - new Date(a.fechaEnvio).getTime()
+                );
+                
+                console.log('✅ Total registros cargados:', this.todosLosRegistros.length);
+                this.aplicarFiltrosRegistros();
+                this.loadingRegistros = false;
+              }
+            },
+            error: (error) => {
+              console.error(`❌ Error al cargar historial de ${socio.nombre}:`, error);
+              sociosProcesados++;
+              
+              if (sociosProcesados === socios.length) {
+                this.todosLosRegistros = registrosCompletos.sort((a, b) => 
+                  new Date(b.fechaEnvio).getTime() - new Date(a.fechaEnvio).getTime()
+                );
+                this.aplicarFiltrosRegistros();
+                this.loadingRegistros = false;
+              }
+            }
+          });
         });
       },
       error: (error) => {
-        console.error('Error al cargar socios para registros:', error);
+        console.error('❌ Error al cargar socios para registros:', error);
+        this.mostrarError('Error al cargar registros de envíos');
+        this.todosLosRegistros = [];
+        this.registrosFiltrados = [];
         this.loadingRegistros = false;
       }
     });
@@ -310,7 +473,6 @@ export class CreditosComponent implements OnInit, OnDestroy {
     }
 
     this.registrosFiltrados = resultado;
-    console.log('🔍 Registros filtrados:', this.registrosFiltrados.length);
   }
 
   limpiarFiltrosRegistros() {
@@ -403,7 +565,6 @@ export class CreditosComponent implements OnInit, OnDestroy {
   // ========== CRUD Operations ==========
 
   abrirDialogNuevo() {
-    console.log('➕ Abriendo diálogo nuevo socio');
     this.socioForm = this.nuevoSocio();
     this.fechaVencimientoDate = null;
     this.esEdicion = false;
@@ -411,7 +572,6 @@ export class CreditosComponent implements OnInit, OnDestroy {
   }
 
   abrirDialogEditar(socio: Socio) {
-    console.log('✏️ Abriendo diálogo editar socio:', socio);
     this.socioForm = { ...socio };
     
     if (socio.fechaVencimientoPago) {
@@ -436,7 +596,7 @@ export class CreditosComponent implements OnInit, OnDestroy {
 
     if (this.esEdicion && this.socioForm.id) {
       this.creditosService.actualizarSocio(this.socioForm.id, this.socioForm).subscribe({
-        next: (response) => {
+        next: () => {
           this.mostrarExito('Socio actualizado correctamente');
           this.cerrarDialog();
           this.cargarSocios();
@@ -448,7 +608,7 @@ export class CreditosComponent implements OnInit, OnDestroy {
       });
     } else {
       this.creditosService.registrarSocio(this.socioForm).subscribe({
-        next: (response) => {
+        next: () => {
           this.mostrarExito('Socio registrado correctamente');
           this.cerrarDialog();
           this.cargarSocios();
@@ -549,7 +709,7 @@ export class CreditosComponent implements OnInit, OnDestroy {
         this.loadingEnvio = true;
         
         this.creditosService.ejecutarEnvioManualScheduler().subscribe({
-          next: (response) => {
+          next: () => {
             this.mostrarExito('Proceso de envío iniciado correctamente');
             this.loadingEnvio = false;
             this.displayEnvioMasivoDialog = false;
@@ -585,6 +745,8 @@ export class CreditosComponent implements OnInit, OnDestroy {
         this.mostrarExito('Mensaje de prueba enviado correctamente');
         this.loadingEnvio = false;
         this.displayTestDialog = false;
+        this.cargarEstadisticas(); 
+        this.cargarTodosLosRegistros();
       },
       error: (error) => {
         this.mostrarError('Error al enviar mensaje de prueba: ' + (error.error?.error || error.message));
@@ -735,4 +897,36 @@ export class CreditosComponent implements OnInit, OnDestroy {
       life: 3000
     });
   }
+
+  getDiasRestantes(fechaVencimiento: string): number {
+    const hoy = new Date();
+    const fecha = new Date(fechaVencimiento);
+
+    hoy.setHours(0, 0, 0, 0);
+    fecha.setHours(0, 0, 0, 0);
+
+    const diff = fecha.getTime() - hoy.getTime();
+    return Math.round(diff / (1000 * 60 * 60 * 24));
+  }
+
+  enviarMensajePersonalizado(socio: any) {
+    const mensaje = prompt("Ingresa el mensaje personalizado para enviar por WhatsApp:");
+
+    if (!mensaje || mensaje.trim() === "") {
+      return;
+    }
+
+    this.creditosService.enviarMensajePrueba(socio.telefono, mensaje).subscribe({
+      next: () => {
+        this.mostrarExito('Mensaje personalizado enviado correctamente');
+      },
+      error: (error) => {
+        console.error("Error enviando mensaje personalizado:", error);
+        this.mostrarError('No se pudo enviar el mensaje');
+      }
+    });
+  }
+  contarPorEstado(estado: string): number {
+  return this.registrosFiltrados.filter(r => r.estado === estado).length;
+}
 }

@@ -1,5 +1,3 @@
-// src/app/service/creditos.service.ts - ACTUALIZADO CON REPORTES
-
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
@@ -43,12 +41,25 @@ export interface EstadisticasDia {
   pendientes: number;
 }
 
+export interface ConfiguracionScheduler {
+  id?: number;
+  hora: number;
+  minuto: number;
+  activo: boolean;
+  horaFormateada?: string;
+  expresionCron?: string;
+  diasAnticipacion?: number;
+  ultimaModificacion?: string;
+  modificadoPor?: string;
+}
+
 export interface SchedulerStatus {
-  schedulerActivo: boolean;
-  proximaEjecucion: string;
-  sociosConVencimientoManana: number;
-  whatsappServiceUrl: string;
-  qrUrl: string;
+  activo: boolean;
+  horaEjecucion: string;
+  expresionCron: string;
+  diasAnticipacion: number;
+  ultimaModificacion: string;
+  modificadoPor: string;
 }
 
 @Injectable({
@@ -179,7 +190,69 @@ export class CreditosService {
     return this.http.get<SchedulerStatus>(`${this.apiUrl}/scheduler/status`);
   }
 
-  // ========== REPORTES (NUEVOS) ==========
+  // ========== NUEVO: Configuración del Scheduler ==========
+
+  obtenerConfiguracionScheduler(): Observable<ConfiguracionScheduler> {
+    console.log('⚙️ GET /configuracion-scheduler');
+    return this.http.get<ConfiguracionScheduler>(`${this.apiUrl}/configuracion-scheduler`).pipe(
+      tap({
+        next: (response) => console.log('✅ Configuración obtenida:', response),
+        error: (error) => console.error('❌ Error al obtener configuración:', error)
+      })
+    );
+  }
+
+  actualizarConfiguracionScheduler(config: ConfiguracionScheduler): Observable<ConfiguracionScheduler> {
+    console.log('💾 PUT /configuracion-scheduler - Datos:', config);
+    return this.http.put<ConfiguracionScheduler>(`${this.apiUrl}/configuracion-scheduler`, config).pipe(
+      tap({
+        next: (response) => console.log('✅ Configuración actualizada:', response),
+        error: (error) => console.error('❌ Error al actualizar configuración:', error)
+      })
+    );
+  }
+
+  activarScheduler(): Observable<any> {
+    console.log('▶️ POST /configuracion-scheduler/activar');
+    return this.http.post(`${this.apiUrl}/configuracion-scheduler/activar`, {}).pipe(
+      tap({
+        next: (response) => console.log('✅ Scheduler activado:', response),
+        error: (error) => console.error('❌ Error al activar scheduler:', error)
+      })
+    );
+  }
+
+  desactivarScheduler(): Observable<any> {
+    console.log('⏸️ POST /configuracion-scheduler/desactivar');
+    return this.http.post(`${this.apiUrl}/configuracion-scheduler/desactivar`, {}).pipe(
+      tap({
+        next: (response) => console.log('✅ Scheduler desactivado:', response),
+        error: (error) => console.error('❌ Error al desactivar scheduler:', error)
+      })
+    );
+  }
+
+  obtenerEstadoScheduler(): Observable<SchedulerStatus> {
+    console.log('📊 GET /configuracion-scheduler/estado');
+    return this.http.get<SchedulerStatus>(`${this.apiUrl}/configuracion-scheduler/estado`).pipe(
+      tap({
+        next: (response) => console.log('✅ Estado obtenido:', response),
+        error: (error) => console.error('❌ Error al obtener estado:', error)
+      })
+    );
+  }
+
+  ejecutarEnvioInmediato(): Observable<any> {
+    console.log('🚀 POST /configuracion-scheduler/ejecutar-ahora');
+    return this.http.post(`${this.apiUrl}/configuracion-scheduler/ejecutar-ahora`, {}).pipe(
+      tap({
+        next: (response) => console.log('✅ Envío ejecutado:', response),
+        error: (error) => console.error('❌ Error al ejecutar envío:', error)
+      })
+    );
+  }
+
+  // ========== REPORTES ==========
 
   obtenerEnviosPorFechas(
     fechaInicio: Date, 

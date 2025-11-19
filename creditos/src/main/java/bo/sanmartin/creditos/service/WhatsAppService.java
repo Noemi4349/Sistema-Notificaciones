@@ -3,12 +3,16 @@ package bo.sanmartin.creditos.service;
 import bo.sanmartin.creditos.model.RegistroEnvio;
 import bo.sanmartin.creditos.model.Socio;
 import bo.sanmartin.creditos.repository.RegistroEnvioRepository;
+import bo.sanmartin.creditos.service.SocioService;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.time.format.DateTimeFormatter;
 
@@ -19,7 +23,10 @@ public class WhatsAppService {
     private final RegistroEnvioRepository registroEnvioRepository;
     private final OkHttpClient httpClient;
     private final ObjectMapper objectMapper;
-    
+
+    @Autowired
+    private SocioService socioService;
+
     @Value("${whatsapp.service.url:http://localhost:3000}")
     private String whatsappServiceUrl;
     
@@ -152,7 +159,24 @@ public class WhatsAppService {
             socio.getNumeroSocio()
         );
     }
-    
+
+    public boolean enviarMensaje(String numero, String mensaje) {
+    try {
+        log.info("📤 Enviando mensaje genérico a: {}", numero);
+
+        if (!verificarConexion()) {
+            throw new Exception("El servicio de WhatsApp no está conectado");
+        }
+
+        enviarMensajeBaileys(numero, mensaje);
+        return true;
+
+    } catch (Exception e) {
+        log.error("❌ Error al enviar mensaje: {}", e.getMessage());
+        return false;
+    }
+}
+
     /**
      * Método de testing para verificar que todo funciona
      */
@@ -160,4 +184,13 @@ public class WhatsAppService {
         log.info("📤 Enviando mensaje de prueba a: {}", numero);
         enviarMensajeBaileys(numero, mensaje);
     }
+
+    @Scheduled(cron = "0 0 8 * * ?") // todos los días a las 08:00 AM
+public void enviarRecordatoriosUnDiaAntes() {
+    socioService.obtenerSociosConVencimientoManana().forEach(socio -> {
+        enviarRecordatorioPago(socio);
+    });
+}
+
+
 }
