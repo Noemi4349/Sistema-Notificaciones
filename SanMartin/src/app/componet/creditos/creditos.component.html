@@ -1,191 +1,218 @@
-<div class="p-grid p-0">
-  <!-- 🕒 SECCIÓN DE PROGRAMACIÓN AUTOMÁTICA -->
-  <div class="p-col-12">
-    <div class="p-card shadow-2 p-4 border-round bg-blue-50 mb-4">
-      <div class="flex justify-content-between align-items-center mb-3">
-        <h3 class="text-xl font-bold text-blue-900 m-0">
-          <i class="pi pi-clock mr-2"></i>
-          Programación Automática de Envíos
-        </h3>
-        <p-button
-          icon="pi pi-cog"
-          label="Configurar"
-          (onClick)="abrirConfiguracionScheduler()"
-          styleClass="p-button-sm p-button-info">
-        </p-button>
-      </div>
+<div class="credit-management-container">
 
-      <!-- Estado del Scheduler -->
-      <div *ngIf="configuracionScheduler" class="grid">
-        <div class="col-12 md:col-6">
-          <div class="p-card bg-white p-3">
-            <div class="flex align-items-center gap-3">
-              <i [class]="schedulerActivo ? 'pi pi-check-circle text-green-600' : 'pi pi-times-circle text-red-600'" 
-                 style="font-size: 2rem;"></i>
-              <div>
-                <p class="text-600 text-sm m-0">Estado del Sistema</p>
-                <p [class]="schedulerActivo ? 'text-green-700 font-bold text-lg m-0' : 'text-red-700 font-bold text-lg m-0'">
-                  {{ schedulerActivo ? '✅ ACTIVO' : '⏸️ INACTIVO' }}
-                </p>
-              </div>
+  <!-- 🎯 HERO SECTION - Programación Automática -->
+  <section class="scheduler-hero">
+    <div class="scheduler-card glass-effect">
+      
+      <!-- Header con gradiente -->
+      <div class="scheduler-header">
+        <div class="header-content">
+          <div class="title-group">
+            <div class="icon-badge pulse-animation">
+              <i class="pi pi-clock"></i>
+            </div>
+            <div>
+              <h2 class="main-title">Programación Automática</h2>
+              <p class="subtitle">Sistema inteligente de recordatorios</p>
             </div>
           </div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="p-card bg-white p-3">
-            <div class="flex align-items-center gap-3">
-              <i class="pi pi-clock text-blue-600" style="font-size: 2rem;"></i>
-              <div>
-                <p class="text-600 text-sm m-0">Hora Programada</p>
-                <p class="text-blue-700 font-bold text-lg m-0">
-                  {{ formatearHora(configuracionScheduler.hora, configuracionScheduler.minuto) }}
-                </p>
-                <p *ngIf="schedulerActivo && tiempoRestante" class="text-500 text-sm m-0">
-                  ⏱️ Próximo envío en: <strong>{{ tiempoRestante }}</strong>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="p-card bg-white p-3">
-            <div class="flex align-items-center gap-3">
-              <i class="pi pi-calendar text-purple-600" style="font-size: 2rem;"></i>
-              <div>
-                <p class="text-600 text-sm m-0">Días de Anticipación</p>
-                <p class="text-purple-700 font-bold text-lg m-0">
-                  {{ configuracionScheduler.diasAnticipacion }} día(s)
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="p-card bg-white p-3">
-            <div class="flex align-items-center gap-3">
-              <i class="pi pi-bolt text-orange-600" style="font-size: 2rem;"></i>
-              <div>
-                <p class="text-600 text-sm m-0">Acción Manual</p>
-                <p-button
-                  label="Ejecutar Ahora"
-                  icon="pi pi-play"
-                  (onClick)="ejecutarEnvioInmediato()"
-                  [loading]="loadingEnvio"
-                  styleClass="p-button-sm p-button-warning mt-1">
-                </p-button>
-              </div>
-            </div>
-          </div>
+          <p-button
+            icon="pi pi-cog"
+            label="Configurar"
+            severity="info"
+            (onClick)="abrirConfiguracionScheduler()">
+          </p-button>
         </div>
       </div>
 
-      <!-- Mensaje de carga -->
-      <div *ngIf="loadingConfiguracion" class="text-center p-4">
-        <i class="pi pi-spin pi-spinner" style="font-size: 2rem;"></i>
-        <p class="mt-2">Cargando configuración...</p>
+      <!-- Grid de Estado del Scheduler -->
+      <div *ngIf="configuracionScheduler" class="scheduler-grid">
+        
+        <!-- Card Estado -->
+        <div class="stat-card status-card" [class.active]="schedulerActivo">
+          <div class="stat-icon-wrapper">
+            <i [class]="schedulerActivo ? 'pi pi-check-circle' : 'pi pi-pause-circle'"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Estado del Sistema</span>
+            <span class="stat-value">{{ schedulerActivo ? 'Activo' : 'Inactivo' }}</span>
+            <div class="status-indicator" [class.active]="schedulerActivo">
+              <span class="pulse-dot"></span>
+              {{ schedulerActivo ? 'En línea' : 'Pausado' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Hora Programada -->
+        <div class="stat-card time-card">
+          <div class="stat-icon-wrapper">
+            <i class="pi pi-clock"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Hora Programada</span>
+            <span class="stat-value">{{ formatearHora(configuracionScheduler.hora, configuracionScheduler.minuto) }}</span>
+            <div *ngIf="schedulerActivo && tiempoRestante" class="countdown">
+              <i class="pi pi-hourglass"></i>
+              <span>{{ tiempoRestante }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card Días de Anticipación -->
+        <div class="stat-card days-card">
+          <div class="stat-icon-wrapper">
+            <i class="pi pi-calendar"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Días de Anticipación</span>
+            <span class="stat-value">{{ configuracionScheduler.diasAnticipacion }}</span>
+            <span class="stat-unit">día(s) antes</span>
+          </div>
+        </div>
+
+        <!-- Card Acción Manual -->
+        <div class="stat-card action-card">
+          <div class="stat-icon-wrapper">
+            <i class="pi pi-bolt"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-label">Ejecución Manual</span>
+            <p-button
+              label="Ejecutar Ahora"
+              icon="pi pi-play"
+              severity="success"
+              (onClick)="ejecutarEnvioInmediato()"
+              [loading]="loadingEnvio">
+            </p-button>
+          </div>
+        </div>
+
       </div>
+
+      <!-- Loading State -->
+      <div *ngIf="loadingConfiguracion" class="loading-state">
+        <i class="pi pi-spin pi-spinner"></i>
+        <p>Cargando configuración del sistema...</p>
+      </div>
+
     </div>
-  </div>
+  </section>
 
-  <!-- 💬 PANEL PRINCIPAL DE RECORDATORIOS -->
-  <div class="p-col-12">
-    <div class="p-card p-5 bg-surface-50 border-round shadow-1">
+  <!-- 💼 SECCIÓN PRINCIPAL DE GESTIÓN -->
+  <section class="management-section">
+    <div class="management-card">
 
-      <!-- Encabezado y botones alineados a la derecha -->
-      <div class="flex justify-content-between align-items-center mb-4">
-        <h2 class="text-900 font-bold m-0">
-          <i class="pi pi-credit-card mr-2"></i>
-          Gestión de Créditos y Recordatorios
-        </h2>
+      <!-- Header Principal -->
+      <div class="main-header">
+        <div class="header-left">
+          <div class="icon-badge-large">
+            <i class="pi pi-credit-card"></i>
+          </div>
+          <div>
+            <h1 class="page-title">Gestión de Créditos</h1>
+            <p class="page-description">Control y seguimiento de recordatorios a socios</p>
+          </div>
+        </div>
 
-        <div class="flex gap-2 flex-wrap">
+        <div class="action-buttons">
           <p-button
             label="Envío Masivo"
             icon="pi pi-send"
-            styleClass="p-button-primary p-button-sm"
-            (onClick)="displayEnvioMasivoDialog = true"
+            severity="primary"
+            (onClick)="ejecutarEnvioMasivo()"
             [loading]="loadingEnvio">
           </p-button>
 
           <p-button
-            label="Test Mensaje"
+            label="Test"
             icon="pi pi-mobile"
-            styleClass="p-button-info p-button-sm"
+            severity="secondary"
             (onClick)="abrirDialogTest()">
           </p-button>
 
           <p-button
-            label="Ver Registros"
+            label="Registros"
             icon="pi pi-chart-bar"
-            styleClass="p-button-warning p-button-sm"
+            severity="help"
             (onClick)="abrirRegistros()">
           </p-button>
 
           <p-button
-            label="Próximos Envíos"
+            label="Calendario"
             icon="pi pi-calendar"
-            styleClass="p-button-help p-button-sm"
-            (onClick)="displayEnvioMasivoDialog = true">
+            severity="info"
+            [outlined]="true"
+            (onClick)="abrirCalendario()">
           </p-button>
         </div>
       </div>
 
-      <!-- 📊 Estadísticas -->
-      <div *ngIf="estadisticas" class="grid mb-4">
-        <div class="col-12 md:col-3">
-          <div class="p-card text-center bg-blue-50">
-            <i class="pi pi-send text-blue-600" style="font-size: 2rem;"></i>
-            <h3 class="mt-2 mb-0 text-blue-900">{{ estadisticas.totalEnvios }}</h3>
-            <p class="text-600 m-0">Total Envíos</p>
+      <!-- 📊 Dashboard de Estadísticas -->
+      <div *ngIf="estadisticas" class="stats-dashboard">
+        <div class="dashboard-card envios-card">
+          <div class="dashboard-icon">
+            <i class="pi pi-send"></i>
           </div>
+          <div class="dashboard-content">
+            <span class="dashboard-value">{{ estadisticas.totalEnvios }}</span>
+            <span class="dashboard-label">Total Envíos</span>
+          </div>
+          <div class="card-decoration"></div>
         </div>
-        <div class="col-12 md:col-3">
-          <div class="p-card text-center bg-green-50">
-            <i class="pi pi-check-circle text-green-600" style="font-size: 2rem;"></i>
-            <h3 class="mt-2 mb-0 text-green-900">{{ estadisticas.enviosExitosos }}</h3>
-            <p class="text-600 m-0">Exitosos</p>
+
+        <div class="dashboard-card exitosos-card">
+          <div class="dashboard-icon">
+            <i class="pi pi-check-circle"></i>
           </div>
+          <div class="dashboard-content">
+            <span class="dashboard-value">{{ estadisticas.enviosExitosos }}</span>
+            <span class="dashboard-label">Exitosos</span>
+          </div>
+          <div class="card-decoration"></div>
         </div>
-        <div class="col-12 md:col-3">
-          <div class="p-card text-center bg-red-50">
-            <i class="pi pi-times-circle text-red-600" style="font-size: 2rem;"></i>
-            <h3 class="mt-2 mb-0 text-red-900">{{ estadisticas.enviosFallidos }}</h3>
-            <p class="text-600 m-0">Fallidos</p>
+
+        <div class="dashboard-card fallidos-card">
+          <div class="dashboard-icon">
+            <i class="pi pi-times-circle"></i>
           </div>
+          <div class="dashboard-content">
+            <span class="dashboard-value">{{ estadisticas.enviosFallidos }}</span>
+            <span class="dashboard-label">Fallidos</span>
+          </div>
+          <div class="card-decoration"></div>
         </div>
-        <div class="col-12 md:col-3">
-          <div class="p-card text-center bg-purple-50">
-            <i class="pi pi-percentage text-purple-600" style="font-size: 2rem;"></i>
-            <h3 class="mt-2 mb-0 text-purple-900">{{ estadisticas.tasaExito | number:'1.1-1' }}%</h3>
-            <p class="text-600 m-0">Tasa de Éxito</p>
+
+        <div class="dashboard-card tasa-card">
+          <div class="dashboard-icon">
+            <i class="pi pi-percentage"></i>
           </div>
+          <div class="dashboard-content">
+            <span class="dashboard-value">{{ estadisticas.tasaExito | number:'1.1-1' }}%</span>
+            <span class="dashboard-label">Tasa de Éxito</span>
+          </div>
+          <div class="card-decoration"></div>
         </div>
       </div>
 
-      <!-- 🔍 Filtros y búsqueda -->
-      <div class="flex justify-content-between align-items-center mb-3 flex-wrap gap-3">
-        <div class="flex gap-2">
-          <span class="p-input-icon-left">
-            <i class="pi pi-search"></i>
-            <input 
-              type="text" 
-              pInputText 
-              [(ngModel)]="busquedaGlobal"
-              (input)="aplicarFiltros()"
-              placeholder="Buscar socio..." 
-              style="width: 300px;" />
-          </span>
+      <!-- 🔍 Barra de Filtros Moderna -->
+      <div class="filters-bar">
+        <div class="search-wrapper">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="busquedaGlobal"
+            (input)="aplicarFiltros()"
+            placeholder="Buscar por nombre, teléfono o email..." 
+            class="search-input"/>
         </div>
 
-        <div class="flex gap-2">
+        <div class="filter-toggle">
           <p-selectButton 
             [options]="[
-              {label: 'Todos', value: 'TODOS'},
-              {label: 'Activos', value: 'ACTIVOS'},
-              {label: 'Inactivos', value: 'INACTIVOS'}
+              {label: '📋 Todos', value: 'TODOS'},
+              {label: '✅ Activos', value: 'ACTIVOS'},
+              {label: '⏸️ Inactivos', value: 'INACTIVOS'}
             ]" 
             [(ngModel)]="filtroEstado"
             (onChange)="aplicarFiltros()"
@@ -195,272 +222,273 @@
         </div>
       </div>
 
-      <!-- 📋 Tabla de socios con créditos -->
-      <p-table
-        [value]="sociosFiltrados"
-        [paginator]="true"
-        [rows]="10"
-        [loading]="loading"
-        responsiveLayout="scroll"
-        styleClass="p-datatable-gridlines"
-        [rowHover]="true"
-        [showCurrentPageReport]="true"
-        currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} socios">
-        
-        <ng-template pTemplate="caption">
-          <div class="flex justify-content-between align-items-center">
-            <span class="text-xl font-semibold">
-              📋 Socios con Créditos ({{ sociosFiltrados.length }})
-            </span>
-            <p-button   
-              label="Agregar Socio" 
-              icon="pi pi-user-plus"
-              styleClass="p-button-success p-button-sm"
-              (onClick)="abrirDialogNuevo()">
-            </p-button>
-          </div>
-        </ng-template>
+      <!-- 📋 Tabla Moderna de Socios -->
+      <div class="table-container">
+        <p-table
+          [value]="sociosFiltrados"
+          [paginator]="true"
+          [rows]="10"
+          [loading]="loading"
+          responsiveLayout="scroll"
+          styleClass="modern-table"
+          [rowHover]="true"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} socios">
 
-        <ng-template pTemplate="header">
-          <tr>
-            <th pSortableColumn="numeroSocio" style="min-width: 120px;">
-              Nº Socio
-              <p-sortIcon field="numeroSocio"></p-sortIcon>
-            </th>
-            <th pSortableColumn="nombre" style="min-width: 200px;">
-              Nombre Completo
-              <p-sortIcon field="nombre"></p-sortIcon>
-            </th>
-            <th pSortableColumn="telefono" style="min-width: 150px;">
-              Teléfono
-              <p-sortIcon field="telefono"></p-sortIcon>
-            </th>
-            <th pSortableColumn="email" style="min-width: 200px;">
-              Email
-              <p-sortIcon field="email"></p-sortIcon>
-            </th>
-            <th pSortableColumn="fechaVencimientoPago" style="min-width: 180px;">
-              Fecha Vencimiento
-              <p-sortIcon field="fechaVencimientoPago"></p-sortIcon>
-            </th>
-            <th pSortableColumn="estado" style="min-width: 100px;">
-              Estado
-              <p-sortIcon field="estado"></p-sortIcon>
-            </th>
-            <th class="text-center" style="min-width: 280px;">Acciones</th>
-          </tr>
-        </ng-template>
+          <ng-template pTemplate="caption">
+            <div class="table-header">
+              <div class="table-title">
+                <i class="pi pi-users"></i>
+                <span>Lista de Socios ({{ sociosFiltrados.length }})</span>
+              </div>
+              <p-button   
+                label="Agregar Socio" 
+                icon="pi pi-user-plus"
+                severity="success"
+                (onClick)="abrirDialogNuevo()">
+              </p-button>
+            </div>
+          </ng-template>
 
-        <ng-template pTemplate="body" let-socio>
-          <tr>
-            <td>
-              <span class="font-semibold">{{ socio.numeroSocio }}</span>
-            </td>
-            <td>
-              <span class="font-semibold">{{ socio.nombre }} {{ socio.apellidoPaterno }} {{ socio.apellidoMaterno }}</span>
-            </td>
-            <td>
-              <i class="pi pi-phone mr-2 text-blue-600"></i>
-              {{ socio.telefono }}
-            </td>
-            <td>
-              <i class="pi pi-envelope mr-2 text-blue-600"></i>
-              {{ socio.email }}
-            </td>
-            <td>
-              <div class="flex flex-column gap-1">
-                <span class="text-600">
-                  {{ formatearFecha(socio.fechaVencimientoPago) }}
-                </span>
-                <p-tag
-                  [value]="getTextoVencimiento(socio.fechaVencimientoPago)"
-                  [severity]="getDiasRestantes(socio.fechaVencimientoPago) < 0 ? 'danger' : (getDiasRestantes(socio.fechaVencimientoPago) <= 1 ? 'warn' : 'success')"
-                  styleClass="text-xs">
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="numeroSocio">
+                <div class="header-cell">
+                  Nº Socio
+                  <p-sortIcon field="numeroSocio"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="nombre">
+                <div class="header-cell">
+                  Nombre Completo
+                  <p-sortIcon field="nombre"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="telefono">
+                <div class="header-cell">
+                  Teléfono
+                  <p-sortIcon field="telefono"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="email">
+                <div class="header-cell">
+                  Email
+                  <p-sortIcon field="email"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="fechaVencimientoPago">
+                <div class="header-cell">
+                  Vencimiento
+                  <p-sortIcon field="fechaVencimientoPago"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="estado">
+                <div class="header-cell">
+                  Estado
+                  <p-sortIcon field="estado"></p-sortIcon>
+                </div>
+              </th>
+              <th class="actions-header">Acciones</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-socio>
+            <tr class="table-row">
+              <td>
+                <span class="numero-socio">{{ socio.numeroSocio }}</span>
+              </td>
+              <td>
+                <div class="nombre-completo">
+                  <div class="avatar">{{ getInitials(socio.nombre, socio.apellidoPaterno) }}</div>
+                  <span>{{ socio.nombre }} {{ socio.apellidoPaterno }} {{ socio.apellidoMaterno }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="contact-info">
+                  <i class="pi pi-phone"></i>
+                  <span>{{ socio.telefono }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="contact-info">
+                  <i class="pi pi-envelope"></i>
+                  <span>{{ socio.email }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="vencimiento-cell">
+                  <span class="fecha">{{ formatearFecha(socio.fechaVencimientoPago) }}</span>
+                  <p-tag
+                    [value]="getTextoVencimiento(socio.fechaVencimientoPago)"
+                    [severity]="getDiasRestantes(socio.fechaVencimientoPago) < 0 ? 'danger' : (getDiasRestantes(socio.fechaVencimientoPago) <= 1 ? 'warn' : 'success')">
+                  </p-tag>
+                </div>
+              </td>
+              <td>
+                <p-tag 
+                  [value]="getEstadoTexto(socio.estado)" 
+                  [severity]="getEstadoBadge(socio.estado)"
+                  [icon]="socio.estado ? 'pi pi-check' : 'pi pi-times'">
                 </p-tag>
-              </div>
-            </td>
-            <td>
-              <p-tag 
-                [value]="getEstadoTexto(socio.estado)" 
-                [severity]="getEstadoBadge(socio.estado)">
-              </p-tag>
-            </td>
-            <td class="text-center">
-              <div class="flex gap-1 justify-content-center flex-wrap">
-                <p-button
-                  icon="pi pi-send"
-                  styleClass="p-button-sm p-button-rounded p-button-primary"
-                  (onClick)="enviarRecordatorio(socio)"
-                  [loading]="loadingEnvio"
-                  pTooltip="Enviar recordatorio"
-                  tooltipPosition="top">
-                </p-button>
-                <p-button
-                  icon="pi pi-history"
-                  styleClass="p-button-sm p-button-rounded p-button-info"
-                  (onClick)="verHistorial(socio)"
-                  pTooltip="Ver historial"
-                  tooltipPosition="top">
-                </p-button>
-                <p-button
-                  icon="pi pi-pencil"
-                  styleClass="p-button-sm p-button-rounded p-button-warning"
-                  (onClick)="abrirDialogEditar(socio)"
-                  pTooltip="Editar"
-                  tooltipPosition="top">
-                </p-button>
-                <p-button
-                  [icon]="socio.estado ? 'pi pi-times' : 'pi pi-check'"
-                  [styleClass]="'p-button-sm p-button-rounded ' + (socio.estado ? 'p-button-danger' : 'p-button-success')"
-                  (onClick)="cambiarEstado(socio)"
-                  [pTooltip]="socio.estado ? 'Desactivar' : 'Activar'"
-                  tooltipPosition="top">
-                </p-button>
-                <p-button
-                  icon="pi pi-trash"
-                  styleClass="p-button-sm p-button-rounded p-button-danger"
-                  (onClick)="eliminarSocio(socio)"
-                  pTooltip="Eliminar"
-                  tooltipPosition="top">
-                </p-button>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
+              </td>
+              <td>
+                <div class="action-buttons-cell">
+                  <p-button
+                    icon="pi pi-send"
+                    [rounded]="true"
+                    [text]="true"
+                    severity="info"
+                    (onClick)="enviarRecordatorio(socio)"
+                    [loading]="loadingEnvio"
+                    pTooltip="Enviar recordatorio"
+                    tooltipPosition="top">
+                  </p-button>
+                  <p-button
+                    icon="pi pi-history"
+                    [rounded]="true"
+                    [text]="true"
+                    severity="help"
+                    (onClick)="verHistorial(socio)"
+                    pTooltip="Ver historial"
+                    tooltipPosition="top">
+                  </p-button>
+                  <p-button
+                    icon="pi pi-pencil"
+                    [rounded]="true"
+                    [text]="true"
+                    severity="secondary"
+                    (onClick)="abrirDialogEditar(socio)"
+                    pTooltip="Editar"
+                    tooltipPosition="top">
+                  </p-button>
+                  <p-button
+                    [icon]="socio.estado ? 'pi pi-ban' : 'pi pi-check'"
+                    [rounded]="true"
+                    [text]="true"
+                    [severity]="socio.estado ? 'warn' : 'success'"
+                    (onClick)="cambiarEstado(socio)"
+                    [pTooltip]="socio.estado ? 'Desactivar' : 'Activar'"
+                    tooltipPosition="top">
+                  </p-button>
+                  <p-button
+                    icon="pi pi-trash"
+                    [rounded]="true"
+                    [text]="true"
+                    severity="danger"
+                    (onClick)="eliminarSocio(socio)"
+                    pTooltip="Eliminar"
+                    tooltipPosition="top">
+                  </p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
 
-        <ng-template pTemplate="emptymessage">
-          <tr>
-            <td colspan="7" class="text-center p-5">
-              <div class="flex flex-column align-items-center gap-3">
-                <i class="pi pi-inbox" style="font-size: 3rem; color: #94a3b8;"></i>
-                <p class="text-600 font-semibold text-xl m-0">
-                  No hay socios registrados
-                </p>
-                <p class="text-500 m-0">Comience agregando un nuevo socio</p>
-              </div>
-            </td>
-          </tr>
-        </ng-template>
-      </p-table>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <i class="pi pi-inbox"></i>
+                  </div>
+                  <h3>No hay socios registrados</h3>
+                  <p>Comience agregando un nuevo socio al sistema</p>
+                  <p-button 
+                    label="Agregar Primer Socio" 
+                    icon="pi pi-plus"
+                    severity="success"
+                    (onClick)="abrirDialogNuevo()">
+                  </p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+      </div>
+
     </div>
-  </div>
+  </section>
+
 </div>
 
-<!-- ⚙️ DIALOG: Configuración del Scheduler -->
+<!-- 🎨 DIÁLOGO: Configuración del Scheduler -->
 <p-dialog 
-  header="⚙️ Configuración del Scheduler"
-  [(visible)]="displayConfiguracionDialog"
-  [modal]="true"
-  [style]="{ width: '600px' }"
+  [(visible)]="displayConfiguracionDialog" 
+  [modal]="true" 
+  [style]="{width: '600px'}"
   [draggable]="false"
-  [resizable]="false">
+  [resizable]="false"
+  header="⚙️ Configuración del Scheduler">
   
-  <div class="p-fluid">
-    <div class="mb-4">
-      <p-message 
-        severity="info" 
-        text="Configure la hora en que se enviarán automáticamente los recordatorios cada día.">
-      </p-message>
-    </div>
-
-    <div class="grid">
-      <div class="col-12">
-        <div class="p-card bg-blue-50 p-3">
-          <h4 class="mt-0">🕐 Hora de Envío</h4>
-          <div class="flex align-items-center gap-3">
-            <div class="field mb-0">
-              <label for="horaConfig" class="font-semibold">Hora (0-23)</label>
-              <p-inputNumber
-                id="horaConfig"
-                [(ngModel)]="horaEnvio"
-                [min]="0"
-                [max]="23"
-                [showButtons]="true"
-                buttonLayout="horizontal"
-                decrementButtonClass="p-button-danger"
-                incrementButtonClass="p-button-success"
-                incrementButtonIcon="pi pi-plus"
-                decrementButtonIcon="pi pi-minus">
-              </p-inputNumber>
-            </div>
-            
-            <span class="text-3xl font-bold">:</span>
-            
-            <div class="field mb-0">
-              <label for="minutoConfig" class="font-semibold">Minuto (0-59)</label>
-              <p-inputNumber
-                id="minutoConfig"
-                [(ngModel)]="minutoEnvio"
-                [min]="0"
-                [max]="59"
-                [showButtons]="true"
-                buttonLayout="horizontal"
-                decrementButtonClass="p-button-danger"
-                incrementButtonClass="p-button-success"
-                incrementButtonIcon="pi pi-plus"
-                decrementButtonIcon="pi pi-minus">
-              </p-inputNumber>
-            </div>
-          </div>
-          
-          <div class="mt-3">
-            <p class="text-600 mb-1">Vista previa:</p>
-            <p class="text-2xl font-bold text-blue-700 m-0">
-              {{ formatearHora(horaEnvio, minutoEnvio) }}
-            </p>
-          </div>
+  <div class="dialog-content">
+    <div class="form-grid">
+      
+      <!-- Estado del Scheduler -->
+      <div class="form-field full-width">
+        <label class="form-label">
+          <i class="pi pi-power-off"></i>
+          Estado del Sistema
+        </label>
+        <div class="toggle-container">
+          <p-checkbox 
+            [(ngModel)]="schedulerActivo" 
+            [binary]="true"
+            inputId="schedulerActivo"
+            label="Scheduler Activo">
+          </p-checkbox>
         </div>
       </div>
 
-      <div class="col-12">
-        <div class="p-card bg-purple-50 p-3">
-          <h4 class="mt-0">📅 Días de Anticipación</h4>
-          <p class="text-600 text-sm">
-            Los recordatorios se enviarán esta cantidad de días ANTES de la fecha de vencimiento.
-          </p>
-          <p-inputNumber
-            [(ngModel)]="diasAnticipacion"
-            [min]="1"
-            [max]="30"
-            [showButtons]="true"
-            buttonLayout="horizontal"
-            suffix=" día(s)"
-            decrementButtonClass="p-button-danger"
-            incrementButtonClass="p-button-success">
-          </p-inputNumber>
-        </div>
+      <!-- Hora de Envío -->
+      <div class="form-field">
+        <label for="hora" class="form-label">
+          <i class="pi pi-clock"></i>
+          Hora (0-23)
+        </label>
+        <p-inputNumber 
+          [(ngModel)]="horaEnvio" 
+          inputId="hora"
+          [min]="0" 
+          [max]="23"
+          [showButtons]="true"
+          placeholder="09">
+        </p-inputNumber>
       </div>
 
-      <div class="col-12">
-        <div class="p-card bg-green-50 p-3">
-          <div class="flex align-items-center justify-content-between">
-            <div>
-              <h4 class="mt-0 mb-2">🔔 Activar Scheduler</h4>
-              <p class="text-600 text-sm m-0">
-                Los envíos automáticos solo funcionarán si el scheduler está activo.
-              </p>
-            </div>
-            <p-checkbox
-              [(ngModel)]="schedulerActivo"
-              [binary]="true"
-              inputId="activarCheck">
-            </p-checkbox>
-          </div>
-        </div>
+      <!-- Minutos de Envío -->
+      <div class="form-field">
+        <label for="minuto" class="form-label">
+          <i class="pi pi-clock"></i>
+          Minutos (0-59)
+        </label>
+        <p-inputNumber 
+          [(ngModel)]="minutoEnvio" 
+          inputId="minuto"
+          [min]="0" 
+          [max]="59"
+          [showButtons]="true"
+          placeholder="00">
+        </p-inputNumber>
       </div>
-    </div>
 
-    <div class="mt-3">
-      <p-message 
-        *ngIf="schedulerActivo"
-        severity="success" 
-        text="✅ El sistema enviará recordatorios automáticamente en el horario configurado.">
-      </p-message>
-      <p-message 
-        *ngIf="!schedulerActivo"
-        severity="warn" 
-        text="⚠️ El scheduler está DESACTIVADO. Los envíos NO se realizarán automáticamente.">
-      </p-message>
+      <!-- Días de Anticipación -->
+      <div class="form-field full-width">
+        <label for="diasAnticipacion" class="form-label">
+          <i class="pi pi-calendar"></i>
+          Días de Anticipación
+        </label>
+        <p-inputNumber 
+          [(ngModel)]="diasAnticipacion" 
+          inputId="diasAnticipacion"
+          [min]="1" 
+          [max]="30"
+          [showButtons]="true"
+          placeholder="1">
+        </p-inputNumber>
+        <small class="form-hint">Los recordatorios se enviarán X días antes del vencimiento</small>
+      </div>
+
     </div>
   </div>
 
@@ -468,124 +496,138 @@
     <p-button 
       label="Cancelar" 
       icon="pi pi-times" 
-      (onClick)="displayConfiguracionDialog = false"
-      styleClass="p-button-text"
-      [disabled]="loadingConfiguracion">
+      (onClick)="displayConfiguracionDialog = false" 
+      severity="secondary"
+      [text]="true">
     </p-button>
     <p-button 
       label="Guardar Configuración" 
       icon="pi pi-check" 
       (onClick)="guardarConfiguracionScheduler()"
-      [loading]="loadingConfiguracion"
-      styleClass="p-button-success">
+      [loading]="loadingConfiguracion">
     </p-button>
   </ng-template>
 </p-dialog>
 
-<!-- 📝 DIALOG: Agregar/Editar Socio -->
+<!-- 🎨 DIÁLOGO: Agregar/Editar Socio -->
 <p-dialog 
-  [header]="esEdicion ? 'Editar Socio' : 'Nuevo Socio'"
-  [(visible)]="displayDialog"
-  [modal]="true"
-  [style]="{ width: '600px', height: '700px' }"
+  [(visible)]="displayDialog" 
+  [modal]="true" 
+  [style]="{width: '700px'}"
   [draggable]="false"
-  [resizable]="false">
+  [resizable]="false"
+  [header]="esEdicion ? '✏️ Editar Socio' : '➕ Nuevo Socio'">
   
-  <div class="p-fluid">
-    <div class="grid">
-      <div class="col-12 md:col-6">
-        <div class="field">
-          <label for="numeroSocio">Número de Socio *</label>
-          <input 
-            id="numeroSocio" 
-            type="text" 
-            pInputText 
-            [(ngModel)]="socioForm.numeroSocio"
-            [disabled]="esEdicion" />
-        </div>
+  <div class="dialog-content">
+    <div class="form-grid">
+      
+      <!-- Número de Socio -->
+      <div class="form-field">
+        <label for="numeroSocio" class="form-label">
+          <i class="pi pi-hashtag"></i>
+          Número de Socio *
+        </label>
+        <input 
+          type="text" 
+          pInputText 
+          id="numeroSocio"
+          [(ngModel)]="socioForm.numeroSocio" 
+          placeholder="Ej: SOC-001"
+          class="form-input"/>
       </div>
 
-      <div class="col-12 md:col-6">
-        <div class="field">
-          <label for="nombre">Nombre *</label>
-          <input 
-            id="nombre" 
-            type="text" 
-            pInputText 
-            [(ngModel)]="socioForm.nombre" />
-        </div>
+      <!-- Nombre -->
+      <div class="form-field">
+        <label for="nombre" class="form-label">
+          <i class="pi pi-user"></i>
+          Nombre *
+        </label>
+        <input 
+          type="text" 
+          pInputText 
+          id="nombre"
+          [(ngModel)]="socioForm.nombre" 
+          placeholder="Nombre"
+          class="form-input"/>
       </div>
 
-      <div class="col-12 md:col-6">
-        <div class="field">
-          <label for="apellidoPaterno">Apellido Paterno *</label>
-          <input 
-            id="apellidoPaterno" 
-            type="text" 
-            pInputText 
-            [(ngModel)]="socioForm.apellidoPaterno" />
-        </div>
+      <!-- Apellido Paterno -->
+      <div class="form-field">
+        <label for="apellidoPaterno" class="form-label">
+          <i class="pi pi-user"></i>
+          Apellido Paterno *
+        </label>
+        <input 
+          type="text" 
+          pInputText 
+          id="apellidoPaterno"
+          [(ngModel)]="socioForm.apellidoPaterno" 
+          placeholder="Apellido Paterno"
+          class="form-input"/>
       </div>
 
-      <div class="col-12 md:col-6">
-        <div class="field">
-          <label for="apellidoMaterno">Apellido Materno</label>
-          <input 
-            id="apellidoMaterno" 
-            type="text" 
-            pInputText 
-            [(ngModel)]="socioForm.apellidoMaterno" />
-        </div>
+      <!-- Apellido Materno -->
+      <div class="form-field">
+        <label for="apellidoMaterno" class="form-label">
+          <i class="pi pi-user"></i>
+          Apellido Materno
+        </label>
+        <input 
+          type="text" 
+          pInputText 
+          id="apellidoMaterno"
+          [(ngModel)]="socioForm.apellidoMaterno" 
+          placeholder="Apellido Materno"
+          class="form-input"/>
       </div>
 
-      <div class="col-12 md:col-6">
-        <div class="field">
-          <label for="telefono">Teléfono (con código país) *</label>
-          <input 
-            id="telefono" 
-            type="text" 
-            pInputText 
-            [(ngModel)]="socioForm.telefono"
-            placeholder="Ej: 59175123456" />
-        </div>
+      <!-- Teléfono -->
+      <div class="form-field">
+        <label for="telefono" class="form-label">
+          <i class="pi pi-phone"></i>
+          Teléfono *
+        </label>
+        <input 
+          type="text" 
+          pInputText 
+          id="telefono"
+          [(ngModel)]="socioForm.telefono" 
+          placeholder="59175123456"
+          class="form-input"/>
+        <small class="form-hint">Incluir código de país (Ej: 59175123456)</small>
       </div>
 
-      <div class="col-12 md:col-6">
-        <div class="field">
-          <label for="email">Email *</label>
-          <input 
-            id="email" 
-            type="email" 
-            pInputText 
-            [(ngModel)]="socioForm.email" />
-        </div>
+      <!-- Email -->
+      <div class="form-field">
+        <label for="email" class="form-label">
+          <i class="pi pi-envelope"></i>
+          Email *
+        </label>
+        <input 
+          type="email" 
+          pInputText 
+          id="email"
+          [(ngModel)]="socioForm.email" 
+          placeholder="correo@ejemplo.com"
+          class="form-input"/>
       </div>
 
-      <div class="col-12 md:col-6" style="margin-bottom: 250px;">
-        <div class="field">
-          <label for="fechaVencimiento">Fecha de Vencimiento *</label>
-          <p-datepicker 
-            [(ngModel)]="fechaVencimientoDate"
-            [showIcon]="true"
-            dateFormat="dd/mm/yy"
-            placeholder="Seleccione fecha">
-          </p-datepicker>
-        </div>
+      <!-- Fecha de Vencimiento -->
+      <div class="form-field full-width">
+        <label for="fechaVencimiento" class="form-label">
+          <i class="pi pi-calendar"></i>
+          Fecha de Vencimiento de Pago *
+        </label>
+        <p-datePicker 
+          [(ngModel)]="fechaVencimientoDate" 
+          inputId="fechaVencimiento"
+          dateFormat="dd/mm/yy"
+          [showIcon]="true"
+          placeholder="Seleccione una fecha"
+          class="w-full">
+        </p-datePicker>
       </div>
 
-      <div class="col-12 md:col-6">
-        <div class="field">
-          <label for="estado">Estado</label>
-          <div class="flex align-items-center mt-2">
-            <p-checkbox 
-              [(ngModel)]="socioForm.estado"
-              [binary]="true"
-              inputId="estado">
-            </p-checkbox>
-            <label for="estado" class="ml-2">Activo</label>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -593,11 +635,12 @@
     <p-button 
       label="Cancelar" 
       icon="pi pi-times" 
-      (onClick)="cerrarDialog()"
-      styleClass="p-button-text">
+      (onClick)="cerrarDialog()" 
+      severity="secondary"
+      [text]="true">
     </p-button>
     <p-button 
-      label="Guardar" 
+      [label]="esEdicion ? 'Actualizar' : 'Guardar'" 
       icon="pi pi-check" 
       (onClick)="guardarSocio()"
       [loading]="loading">
@@ -605,160 +648,100 @@
   </ng-template>
 </p-dialog>
 
-<!-- 📜 DIALOG: Historial de Envíos -->
+<!-- 🎨 DIÁLOGO: Historial de Envíos -->
 <p-dialog 
-  header="📜 Historial de Envíos"
-  [(visible)]="displayHistorialDialog"
-  [modal]="true"
-  [style]="{ width: '800px' }"
-  [draggable]="false">
+  [(visible)]="displayHistorialDialog" 
+  [modal]="true" 
+  [style]="{width: '900px'}"
+  [draggable]="false"
+  [resizable]="false"
+  header="📜 Historial de Envíos">
   
-  <div *ngIf="socioSeleccionado" class="mb-3 p-card bg-blue-50 p-3">
-    <h4 class="m-0">
-      <i class="pi pi-user mr-2"></i>
-      {{ socioSeleccionado.nombre }} {{ socioSeleccionado.apellidoPaterno }}
-    </h4>
-    <p class="text-600 m-0">
-      <i class="pi pi-phone mr-2"></i>
-      Teléfono: {{ socioSeleccionado.telefono }}
-    </p>
+  <div class="historial-content">
+    <p-table 
+      [value]="historialEnvios" 
+      [paginator]="true" 
+      [rows]="5"
+      responsiveLayout="scroll">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Fecha/Hora</th>
+          <th>Número</th>
+          <th>Estado</th>
+          <th>Mensaje</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-registro>
+        <tr>
+          <td>{{ formatearFechaHora(registro.fechaEnvio) }}</td>
+          <td>{{ registro.numeroDestino }}</td>
+          <td>
+            <p-tag 
+              [value]="registro.estado" 
+              [severity]="getEstadoEnvioBadge(registro.estado)">
+            </p-tag>
+          </td>
+          <td>
+            <span *ngIf="registro.estado === 'EXITOSO'">{{ registro.mensaje }}</span>
+            <span *ngIf="registro.estado === 'FALLIDO'" class="error-text">{{ registro.mensajeError }}</span>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="text-center">No hay registros de envíos para este socio</td>
+        </tr>
+      </ng-template>
+
+    </p-table>
   </div>
-
-  <p-table 
-    [value]="historialEnvios"
-    [paginator]="true"
-    [rows]="5"
-    responsiveLayout="scroll"
-    styleClass="p-datatable-gridlines">
-    
-    <ng-template pTemplate="header">
-      <tr>
-        <th style="width: 200px;">Fecha/Hora</th>
-        <th style="width: 120px;">Estado</th>
-        <th>Mensaje</th>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="body" let-registro>
-      <tr>
-        <td>{{ formatearFechaHora(registro.fechaEnvio) }}</td>
-        <td>
-          <p-tag 
-            [value]="registro.estado" 
-            [severity]="getEstadoEnvioBadge(registro.estado)">
-          </p-tag>
-        </td>
-        <td>
-          <div *ngIf="registro.estado === 'EXITOSO'" class="text-sm">
-            {{ registro.mensaje }}
-          </div>
-          <div *ngIf="registro.estado === 'FALLIDO'" class="text-red-600 text-sm">
-            <i class="pi pi-exclamation-triangle mr-2"></i>
-            {{ registro.mensajeError }}
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="3" class="text-center p-4">
-          <i class="pi pi-inbox" style="font-size: 2rem; color: #94a3b8;"></i>
-          <p class="text-600 mt-2 mb-0">No hay registros de envíos</p>
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
 </p-dialog>
 
-<!-- 📤 DIALOG: Envío Masivo -->
+<!-- 🎨 DIÁLOGO: Test de Mensaje -->
 <p-dialog 
-  header="📤 Envío Masivo de Recordatorios"
-  [(visible)]="displayEnvioMasivoDialog"
-  [modal]="true"
-  [style]="{ width: '700px' }"
-  [draggable]="false">
+  [(visible)]="displayTestDialog" 
+  [modal]="true" 
+  [style]="{width: '500px'}"
+  [draggable]="false"
+  [resizable]="false"
+  header="📱 Enviar Mensaje de Prueba">
   
-  <div class="p-card mb-3 bg-blue-50 p-4">
-    <h4 class="mt-0">
-      <i class="pi pi-calendar-plus mr-2"></i>
-      Próximos Envíos Programados
-    </h4>
-    <div *ngIf="proximosEnvios" class="grid">
-      <div class="col-6">
-        <p class="mb-2"><strong>Total a enviar:</strong> <span class="text-blue-700">{{ proximosEnvios.total }}</span></p>
-        <p class="mb-2"><strong>Hoy:</strong> <span class="text-orange-700">{{ proximosEnvios.hoy }}</span></p>
-      </div>
-      <div class="col-6">
-        <p class="mb-2"><strong>Esta semana:</strong> <span class="text-purple-700">{{ proximosEnvios.semana }}</span></p>
-        <p class="mb-2"><strong>Este mes:</strong> <span class="text-green-700">{{ proximosEnvios.mes }}</span></p>
-      </div>
-    </div>
-  </div>
-
-  <p-message 
-    severity="warn" 
-    text="⚠️ Esta acción enviará recordatorios a todos los socios con pagos próximos a vencer. ¿Desea continuar?">
-  </p-message>
-
-  <ng-template pTemplate="footer">
-    <p-button 
-      label="Cancelar" 
-      icon="pi pi-times" 
-      (onClick)="displayEnvioMasivoDialog = false"
-      styleClass="p-button-text">
-    </p-button>
-    <p-button 
-      label="Ejecutar Envío" 
-      icon="pi pi-send" 
-      (onClick)="ejecutarEnvioMasivo()"
-      [loading]="loadingEnvio"
-      styleClass="p-button-primary">
-    </p-button>
-  </ng-template>
-</p-dialog>
-
-<!-- 📱 DIALOG: Test de Mensaje -->
-<p-dialog 
-  header="📱 Enviar Mensaje de Prueba"
-  [(visible)]="displayTestDialog"
-  [modal]="true"
-  [style]="{ width: '500px' }"
-  [draggable]="false">
-  
-  <div class="p-fluid">
-    <div class="mb-3">
-      <p-message 
-        severity="info" 
-        text="Envíe un mensaje de prueba para verificar la conexión con WhatsApp.">
-      </p-message>
-    </div>
-
-    <div class="field">
-      <label for="numeroTest">Número de Teléfono (con código país) *</label>
-      <div class="p-inputgroup">
-        <span class="p-inputgroup-addon">
+  <div class="dialog-content">
+    <div class="form-grid">
+      
+      <div class="form-field full-width">
+        <label for="numeroTest" class="form-label">
           <i class="pi pi-phone"></i>
-        </span>
+          Número de WhatsApp *
+        </label>
         <input 
-          id="numeroTest" 
           type="text" 
           pInputText 
-          [(ngModel)]="numeroTest"
-          placeholder="Ej: 59175123456" />
+          id="numeroTest"
+          [(ngModel)]="numeroTest" 
+          placeholder="59175123456"
+          class="form-input"/>
+        <small class="form-hint">Incluir código de país</small>
       </div>
-      <small class="text-500">Incluya el código de país sin el signo +</small>
-    </div>
 
-    <div class="field">
-      <label for="mensajeTest">Mensaje</label>
-      <textarea 
-        id="mensajeTest"
-        pInputTextarea
-        [(ngModel)]="mensajeTest"
-        [rows]="5"
-        placeholder="Escriba el mensaje de prueba...">
-      </textarea>
+      <div class="form-field full-width">
+        <label for="mensajeTest" class="form-label">
+          <i class="pi pi-comment"></i>
+          Mensaje
+        </label>
+        <textarea 
+          pTextarea 
+          id="mensajeTest"
+          [(ngModel)]="mensajeTest" 
+          rows="4"
+          placeholder="Escribe tu mensaje..."
+          class="form-input">
+        </textarea>
+      </div>
+
     </div>
   </div>
 
@@ -766,44 +749,43 @@
     <p-button 
       label="Cancelar" 
       icon="pi pi-times" 
-      (onClick)="displayTestDialog = false"
-      styleClass="p-button-text">
+      (onClick)="displayTestDialog = false" 
+      severity="secondary"
+      [text]="true">
     </p-button>
     <p-button 
-      label="Enviar" 
+      label="Enviar Mensaje" 
       icon="pi pi-send" 
       (onClick)="enviarMensajePrueba()"
-      [loading]="loadingEnvio"
-      styleClass="p-button-success">
+      [loading]="loadingEnvio">
     </p-button>
   </ng-template>
 </p-dialog>
 
-<!-- 📊 DIALOG: Todos los Registros -->
+<!-- 🎨 DIÁLOGO: Registros de Envíos -->
 <p-dialog 
-  header="📊 Registros de Envíos"
-  [(visible)]="displayRegistrosDialog"
-  [modal]="true"
-  [style]="{ width: '90vw', height: '80vh' }"
+  [(visible)]="displayRegistrosDialog" 
+  [modal]="true" 
+  [style]="{width: '95%', maxWidth: '1200px'}"
   [draggable]="false"
-  [maximizable]="true">
+  [resizable]="false"
+  header="📊 Todos los Registros de Envíos">
   
-  <!-- Filtros -->
-  <div class="grid mb-3">
-    <div class="col-12 md:col-4">
-      <span class="p-input-icon-left w-full">
+  <div class="registros-content">
+    
+    <!-- Filtros de Registros -->
+    <div class="registros-filters">
+      <div class="search-wrapper">
         <i class="pi pi-search"></i>
         <input 
           type="text" 
           pInputText 
           [(ngModel)]="busquedaRegistro"
           (input)="aplicarFiltrosRegistros()"
-          placeholder="Buscar en registros..."
-          class="w-full" />
-      </span>
-    </div>
+          placeholder="Buscar por número o mensaje..." 
+          class="search-input"/>
+      </div>
 
-    <div class="col-12 md:col-3">
       <p-selectButton 
         [options]="[
           {label: 'Todos', value: 'TODOS'},
@@ -815,129 +797,124 @@
         optionLabel="label"
         optionValue="value">
       </p-selectButton>
+
+      <p-button 
+        label="Limpiar" 
+        icon="pi pi-filter-slash" 
+        (onClick)="limpiarFiltrosRegistros()"
+        severity="secondary"
+        [text]="true">
+      </p-button>
+
+      <p-button 
+        label="Exportar CSV" 
+        icon="pi pi-download" 
+        (onClick)="exportarRegistrosCSV()"
+        severity="help">
+      </p-button>
     </div>
 
-    <div class="col-12 md:col-3">
-      <p-datepicker 
-        [(ngModel)]="rangoFechas"
-        selectionMode="range"
-        [showIcon]="true"
-        (onSelect)="aplicarFiltrosRegistros()"
-        placeholder="Rango de fechas"
-        dateFormat="dd/mm/yy">
-      </p-datepicker>
-    </div>
-
-    <div class="col-12 md:col-2">
-      <div class="flex gap-2">
-        <p-button 
-          icon="pi pi-filter-slash"
-          (onClick)="limpiarFiltrosRegistros()"
-          pTooltip="Limpiar filtros"
-          styleClass="p-button-outlined p-button-secondary">
-        </p-button>
-        <p-button 
-          icon="pi pi-download"
-          (onClick)="exportarRegistrosCSV()"
-          pTooltip="Exportar CSV"
-          styleClass="p-button-success">
-        </p-button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Tabla de registros -->
-  <p-table 
-    [value]="registrosFiltrados"
-    [paginator]="true"
-    [rows]="10"
-    [loading]="loadingRegistros"
-    responsiveLayout="scroll"
-    styleClass="p-datatable-gridlines"
-    [showCurrentPageReport]="true"
-    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
-    
-    <ng-template pTemplate="header">
-      <tr>
-        <th pSortableColumn="fechaEnvio" style="min-width: 180px;">
-          Fecha/Hora
-          <p-sortIcon field="fechaEnvio"></p-sortIcon>
-        </th>
-        <th style="min-width: 200px;">Socio</th>
-        <th style="min-width: 150px;">Número</th>
-        <th pSortableColumn="estado" style="min-width: 120px;">
-          Estado
-          <p-sortIcon field="estado"></p-sortIcon>
-        </th>
-        <th style="min-width: 300px;">Mensaje</th>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="body" let-registro>
-      <tr>
-        <td>{{ formatearFechaHora(registro.fechaEnvio) }}</td>
-        <td>
-          <i class="pi pi-user mr-2 text-blue-600"></i>
-          <span class="font-semibold">{{ registro.nombreSocio || 'N/A' }}</span>
-        </td>
-        <td>
-          <i class="pi pi-phone mr-2 text-green-600"></i>
-          {{ registro.numeroDestino }}
-        </td>
-        <td>
-          <p-tag 
-            [value]="registro.estado" 
-            [severity]="getEstadoEnvioBadge(registro.estado)">
-          </p-tag>
-        </td>
-        <td>
-          <div *ngIf="registro.estado === 'EXITOSO'" class="text-sm">
-            <i class="pi pi-check-circle text-green-600 mr-2"></i>
-            {{ registro.mensaje }}
-          </div>
-          <div *ngIf="registro.estado === 'FALLIDO'" class="text-red-600 text-sm">
-            <i class="pi pi-exclamation-triangle mr-2"></i>
-            {{ registro.mensajeError }}
-          </div>
-          <div *ngIf="registro.estado === 'PENDIENTE'" class="text-orange-600 text-sm">
-            <i class="pi pi-clock mr-2"></i>
-            Pendiente de envío
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="5" class="text-center p-5">
-          <i class="pi pi-inbox" style="font-size: 3rem; color: #94a3b8;"></i>
-          <p class="text-600 font-semibold text-xl mt-3 mb-1">No hay registros disponibles</p>
-          <p class="text-500 m-0">Los registros de envíos aparecerán aquí</p>
-        </td>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="summary">
-      <div class="flex justify-content-between align-items-center p-3 bg-blue-50 border-round">
+    <!-- Resumen de Registros -->
+    <div class="registros-summary">
+      <div class="summary-card">
+        <i class="pi pi-list"></i>
         <div>
-          <span class="font-semibold">Total de registros: </span>
-          <span class="text-blue-700 font-bold">{{ registrosFiltrados.length }}</span>
-        </div>
-        <div class="flex gap-3">
-          <span>
-            <i class="pi pi-check-circle text-green-600 mr-1"></i>
-            Exitosos: <strong>{{ contarPorEstado('EXITOSO') }}</strong>
-          </span>
-          <span>
-            <i class="pi pi-times-circle text-red-600 mr-1"></i>
-            Fallidos: <strong>{{ contarPorEstado('FALLIDO') }}</strong>
-          </span>
+          <span class="summary-value">{{ registrosFiltrados.length }}</span>
+          <span class="summary-label">Total</span>
         </div>
       </div>
-    </ng-template>
-  </p-table>
+      <div class="summary-card success">
+        <i class="pi pi-check-circle"></i>
+        <div>
+          <span class="summary-value">{{ contarPorEstado('EXITOSO') }}</span>
+          <span class="summary-label">Exitosos</span>
+        </div>
+      </div>
+              <div class="summary-card danger">
+        <i class="pi pi-times-circle"></i>
+        <div>
+          <span class="summary-value">{{ contarPorEstado('FALLIDO') }}</span>
+          <span class="summary-label">Fallidos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Registros -->
+    <p-table 
+      [value]="registrosFiltrados" 
+      [paginator]="true" 
+      [rows]="10"
+      [loading]="loadingRegistros"
+      responsiveLayout="scroll"
+      [rowHover]="true"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="fechaEnvio">
+            Fecha/Hora
+            <p-sortIcon field="fechaEnvio"></p-sortIcon>
+          </th>
+          <th>Socio</th>
+          <th pSortableColumn="numeroDestino">
+            Número
+            <p-sortIcon field="numeroDestino"></p-sortIcon>
+          </th>
+          <th pSortableColumn="estado">
+            Estado
+            <p-sortIcon field="estado"></p-sortIcon>
+          </th>
+          <th>Mensaje/Error</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-registro>
+        <tr>
+          <td>{{ formatearFechaHora(registro.fechaEnvio) }}</td>
+          <td>
+            <span class="socio-nombre">{{ registro.nombreSocio || 'N/A' }}</span>
+          </td>
+          <td>
+            <div class="contact-info">
+              <i class="pi pi-phone"></i>
+              <span>{{ registro.numeroDestino }}</span>
+            </div>
+          </td>
+          <td>
+            <p-tag 
+              [value]="registro.estado" 
+              [severity]="getEstadoEnvioBadge(registro.estado)"
+              [icon]="registro.estado === 'EXITOSO' ? 'pi pi-check' : 'pi pi-times'">
+            </p-tag>
+          </td>
+          <td>
+            <span *ngIf="registro.estado === 'EXITOSO'" class="mensaje-preview">
+              {{ registro.mensaje | slice:0:50 }}{{ registro.mensaje?.length > 50 ? '...' : '' }}
+            </span>
+            <span *ngIf="registro.estado === 'FALLIDO'" class="error-text">
+              <i class="pi pi-exclamation-triangle"></i>
+              {{ registro.mensajeError }}
+            </span>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5">
+            <div class="empty-state-small">
+              <i class="pi pi-inbox"></i>
+              <p>No hay registros que mostrar</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+    </p-table>
+  </div>
 </p-dialog>
 
-<!-- Toast y ConfirmDialog -->
-<p-toast position="top-right"></p-toast>
+<!-- 🎯 Componentes de PrimeNG -->
+<p-toast></p-toast>
 <p-confirmDialog></p-confirmDialog>

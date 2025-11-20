@@ -929,4 +929,13 @@ export class CreditosComponent implements OnInit, OnDestroy {
   contarPorEstado(estado: string): number {
   return this.registrosFiltrados.filter(r => r.estado === estado).length;
 }
+abrirCalendario() {
+  // Placeholder para abrir vista de calendario
+  this.mostrarAdvertencia('Función de calendario en desarrollo');
+  // Aquí puedes implementar la lógica para mostrar un calendario
+  // o redirigir a una vista de calendario
+}
+getInitials(nombre: string, apellido: string): string {
+  return (nombre?.charAt(0) + apellido?.charAt(0)).toUpperCase();
+}
 }
