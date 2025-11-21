@@ -1,0 +1,295 @@
+<div class="historial-container">
+
+  <!-- 📊 HEADER -->
+  <section class="historial-header">
+    <div class="header-card glass-effect">
+      
+      <div class="header-content">
+        <div class="header-left">
+          <div class="icon-badge-large">
+            <i class="pi pi-chart-bar"></i>
+          </div>
+          <div>
+            <h1 class="page-title">Historial Completo de Envíos</h1>
+            <p class="page-description">Registro detallado de todos los mensajes enviados</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <p-button
+            label="Volver"
+            icon="pi pi-arrow-left"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="volverACreditos()">
+          </p-button>
+          
+          <p-button
+            label="Refrescar"
+            icon="pi pi-refresh"
+            severity="info"
+            (onClick)="cargarTodosLosRegistros()"
+            [loading]="loadingRegistros">
+          </p-button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 📈 ESTADÍSTICAS RÁPIDAS -->
+  <section class="stats-section">
+    <div class="stats-grid">
+      
+      <div class="stat-card total-card">
+        <div class="stat-icon">
+          <i class="pi pi-list"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ registrosFiltrados.length }}</span>
+          <span class="stat-label">Total Registros</span>
+        </div>
+        <div class="stat-decoration"></div>
+      </div>
+
+      <div class="stat-card success-card">
+        <div class="stat-icon">
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ contarPorEstado('EXITOSO') }}</span>
+          <span class="stat-label">Exitosos</span>
+        </div>
+        <div class="stat-decoration"></div>
+      </div>
+
+      <div class="stat-card danger-card">
+        <div class="stat-icon">
+          <i class="pi pi-times-circle"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ contarPorEstado('FALLIDO') }}</span>
+          <span class="stat-label">Fallidos</span>
+        </div>
+        <div class="stat-decoration"></div>
+      </div>
+
+      <div class="stat-card rate-card">
+        <div class="stat-icon">
+          <i class="pi pi-percentage"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">
+            {{ registrosFiltrados.length > 0 ? ((contarPorEstado('EXITOSO') / registrosFiltrados.length) * 100 | number:'1.1-1') : 0 }}%
+          </span>
+          <span class="stat-label">Tasa de Éxito</span>
+        </div>
+        <div class="stat-decoration"></div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 🔍 FILTROS Y TABLA -->
+  <section class="content-section">
+    <div class="content-card">
+
+      <!-- Barra de Filtros -->
+      <div class="filters-bar">
+        
+        <div class="search-wrapper">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="busquedaRegistro"
+            (input)="aplicarFiltrosRegistros()"
+            placeholder="Buscar por número, socio o mensaje..." 
+            class="search-input"/>
+        </div>
+
+        <div class="filter-controls">
+          <p-selectButton 
+            [options]="[
+              {label: '📋 Todos', value: 'TODOS'},
+              {label: '✅ Exitosos', value: 'EXITOSO'},
+              {label: '❌ Fallidos', value: 'FALLIDO'}
+            ]" 
+            [(ngModel)]="filtroEstadoRegistro"
+            (onChange)="aplicarFiltrosRegistros()"
+            optionLabel="label"
+            optionValue="value">
+          </p-selectButton>
+
+          <p-button 
+            label="Limpiar" 
+            icon="pi pi-filter-slash" 
+            (onClick)="limpiarFiltrosRegistros()"
+            severity="secondary"
+            [text]="true">
+          </p-button>
+
+          <p-button 
+            label="Exportar CSV" 
+            icon="pi pi-download" 
+            (onClick)="exportarRegistrosCSV()"
+            severity="success">
+          </p-button>
+        </div>
+
+      </div>
+
+      <!-- Tabla de Registros -->
+      <div class="table-wrapper">
+        
+        <!-- Loading State -->
+        <div *ngIf="loadingRegistros" class="loading-overlay">
+          <div class="loading-content">
+            <p-progressSpinner 
+              styleClass="custom-spinner"
+              strokeWidth="4"
+              animationDuration="1s">
+            </p-progressSpinner>
+            <p>Cargando registros...</p>
+          </div>
+        </div>
+
+        <!-- Tabla -->
+        <p-table 
+          *ngIf="!loadingRegistros"
+          [value]="registrosFiltrados" 
+          [paginator]="true" 
+          [rows]="15"
+          [rowsPerPageOptions]="[10, 15, 25, 50]"
+          responsiveLayout="scroll"
+          styleClass="modern-table"
+          [rowHover]="true"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
+          
+          <ng-template pTemplate="caption">
+            <div class="table-caption">
+              <div class="caption-left">
+                <i class="pi pi-file-excel"></i>
+                <span>Registros de Envíos</span>
+              </div>
+              <div class="caption-right">
+                <span class="record-count">{{ registrosFiltrados.length }} registros</span>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="fechaEnvio" style="width: 15%">
+                <div class="header-cell">
+                  <i class="pi pi-calendar"></i>
+                  Fecha/Hora
+                  <p-sortIcon field="fechaEnvio"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="nombreSocio" style="width: 20%">
+                <div class="header-cell">
+                  <i class="pi pi-user"></i>
+                  Socio
+                  <p-sortIcon field="nombreSocio"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="numeroDestino" style="width: 15%">
+                <div class="header-cell">
+                  <i class="pi pi-phone"></i>
+                  Número
+                  <p-sortIcon field="numeroDestino"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="estado" style="width: 12%">
+                <div class="header-cell">
+                  <i class="pi pi-info-circle"></i>
+                  Estado
+                  <p-sortIcon field="estado"></p-sortIcon>
+                </div>
+              </th>
+              <th style="width: 38%">
+                <div class="header-cell">
+                  <i class="pi pi-comment"></i>
+                  Mensaje / Error
+                </div>
+              </th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-registro>
+            <tr class="table-row">
+              <td>
+                <div class="fecha-cell">
+                  <i class="pi pi-clock"></i>
+                  <span>{{ formatearFechaHora(registro.fechaEnvio) }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="socio-cell">
+                  <div class="socio-avatar">
+                    {{ (registro.nombreSocio || 'NA').substring(0, 2).toUpperCase() }}
+                  </div>
+                  <span class="socio-nombre">{{ registro.nombreSocio || 'N/A' }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="phone-cell">
+                  <i class="pi pi-mobile"></i>
+                  <span>{{ registro.numeroDestino }}</span>
+                </div>
+              </td>
+              <td>
+                <p-tag 
+                  [value]="registro.estado" 
+                  [severity]="getEstadoEnvioBadge(registro.estado)"
+                  [icon]="registro.estado === 'EXITOSO' ? 'pi pi-check' : 'pi pi-times'">
+                </p-tag>
+              </td>
+              <td>
+                <div class="mensaje-cell">
+                  <span *ngIf="registro.estado === 'EXITOSO'" class="mensaje-exitoso">
+                    <i class="pi pi-check-circle"></i>
+                    {{ registro.mensaje | slice:0:100 }}{{ registro.mensaje?.length > 100 ? '...' : '' }}
+                  </span>
+                  <span *ngIf="registro.estado === 'FALLIDO'" class="mensaje-error">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    {{ registro.mensajeError }}
+                  </span>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="5">
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <i class="pi pi-inbox"></i>
+                  </div>
+                  <h3>No hay registros</h3>
+                  <p>No se encontraron registros que coincidan con los filtros aplicados</p>
+                  <p-button 
+                    label="Limpiar Filtros" 
+                    icon="pi pi-filter-slash"
+                    severity="info"
+                    (onClick)="limpiarFiltrosRegistros()">
+                  </p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<!-- 🎯 Toast -->
+<p-toast></p-toast>

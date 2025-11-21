@@ -1,0 +1,23 @@
+.card {
+  //background: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+h2, h3 {
+  color: #2a3d66;
+}
+
+textarea {
+  border-radius: 6px;
+  padding: .5rem;
+}
+
+.p-button {
+  background: #a084e8;
+  border: none;
+}
+
+.p-button:hover {
+  background: #8667e9;
+}

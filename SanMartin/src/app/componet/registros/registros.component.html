@@ -1,0 +1,348 @@
+<div class="registros-container">
+
+  <!-- 🎯 HERO SECTION -->
+  <section class="hero-section">
+    <div class="hero-card glass-effect">
+      
+      <!-- Header Principal -->
+      <div class="hero-header">
+        <div class="header-content">
+          <div class="title-group">
+            <div class="icon-badge pulse-animation">
+              <i class="pi pi-chart-bar"></i>
+            </div>
+            <div>
+              <h1 class="main-title">Registros del Sistema</h1>
+              <p class="subtitle">Monitoreo y análisis de todos los envíos</p>
+            </div>
+          </div>
+          
+          <div class="action-buttons">
+            <p-button
+              label="Actualizar"
+              icon="pi pi-refresh"
+              severity="info"
+              (onClick)="actualizarManual()"
+              [loading]="loading">
+            </p-button>
+            
+            <p-button
+              label="Exportar CSV"
+              icon="pi pi-download"
+              severity="success"
+              (onClick)="exportarRegistrosCSV()">
+            </p-button>
+            
+            <p-button
+              label="Exportar JSON"
+              icon="pi pi-file"
+              severity="help"
+              (onClick)="exportarRegistrosJSON()">
+            </p-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Selector de Módulo Destacado -->
+      <div class="module-selector">
+        <div class="selector-label">
+          <i class="pi pi-filter"></i>
+          <span>Filtrar por Módulo:</span>
+        </div>
+        
+        <div class="modules-grid">
+          <div 
+            *ngFor="let modulo of modulosDisponibles"
+            class="module-card"
+            [class.active]="moduloSeleccionado.codigo === modulo.codigo"
+            (click)="moduloSeleccionado = modulo; onModuloChange()"
+            [style.--module-color]="modulo.color">
+            <div class="module-icon">
+              <i [class]="'pi ' + modulo.icono"></i>
+            </div>
+            <div class="module-info">
+              <span class="module-name">{{ modulo.nombre }}</span>
+              <span class="module-count">
+                {{ obtenerConteoModulo(modulo) }} registros
+              </span>
+            </div>
+            <div class="module-indicator"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dashboard de Estadísticas -->
+      <div class="stats-dashboard">
+        <div class="stat-card total-card">
+          <div class="stat-icon">
+            <i class="pi pi-database"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.total }}</span>
+            <span class="stat-label">Total Registros</span>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+
+        <div class="stat-card success-card">
+          <div class="stat-icon">
+            <i class="pi pi-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.exitosos }}</span>
+            <span class="stat-label">Exitosos</span>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+
+        <div class="stat-card danger-card">
+          <div class="stat-icon">
+            <i class="pi pi-times-circle"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.fallidos }}</span>
+            <span class="stat-label">Fallidos</span>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+
+        <div class="stat-card warn-card">
+          <div class="stat-icon">
+            <i class="pi pi-clock"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.pendientes }}</span>
+            <span class="stat-label">Pendientes</span>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+
+        <div class="stat-card rate-card">
+          <div class="stat-icon">
+            <i class="pi pi-percentage"></i>
+          </div>
+          <div class="stat-content">
+            <span class="stat-value">{{ estadisticas.tasaExito | number:'1.1-1' }}%</span>
+            <span class="stat-label">Tasa de Éxito</span>
+          </div>
+          <div class="stat-decoration"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 📋 SECCIÓN DE REGISTROS -->
+  <section class="records-section">
+    <div class="records-card">
+
+      <!-- Filtros Avanzados -->
+      <div class="filters-bar">
+        <div class="search-wrapper">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText 
+            [(ngModel)]="busquedaRegistro"
+            (input)="aplicarFiltros()"
+            placeholder="Buscar por número, socio, mensaje..." 
+            class="search-input"/>
+        </div>
+
+        <p-selectButton 
+          [options]="opcionesEstado" 
+          [(ngModel)]="filtroEstadoRegistro"
+          (onChange)="aplicarFiltros()"
+          optionLabel="label"
+          optionValue="value">
+        </p-selectButton>
+
+        <p-datePicker
+          [(ngModel)]="rangoFechas"
+          selectionMode="range"
+          [showIcon]="true"
+          placeholder="Rango de fechas"
+          dateFormat="dd/mm/yy"
+          (onSelect)="aplicarFiltros()"
+          (onClear)="aplicarFiltros()">
+        </p-datePicker>
+
+        <p-button
+          icon="pi pi-filter-slash"
+          label="Limpiar"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="limpiarFiltros()">
+        </p-button>
+      </div>
+
+      <!-- Tabla de Registros -->
+      <div class="table-container">
+        <p-table
+          [value]="registrosFiltrados"
+          [paginator]="true"
+          [rows]="15"
+          [loading]="loading"
+          responsiveLayout="scroll"
+          styleClass="modern-table"
+          [rowHover]="true"
+          [showCurrentPageReport]="true"
+          currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros"
+          [rowsPerPageOptions]="[15, 25, 50, 100]">
+
+          <ng-template pTemplate="caption">
+            <div class="table-header">
+              <div class="table-title">
+                <i class="pi pi-list"></i>
+                <span>Historial de Registros</span>
+                <p-chip 
+                  [label]="registrosFiltrados.length.toString()" 
+                  styleClass="custom-chip">
+                </p-chip>
+              </div>
+            </div>
+          </ng-template>
+
+          <ng-template pTemplate="header">
+            <tr>
+              <th pSortableColumn="fechaEnvio">
+                <div class="header-cell">
+                  Fecha/Hora
+                  <p-sortIcon field="fechaEnvio"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="modulo">
+                <div class="header-cell">
+                  Módulo
+                  <p-sortIcon field="modulo"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="nombreSocio">
+                <div class="header-cell">
+                  Socio
+                  <p-sortIcon field="nombreSocio"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="numeroDestino">
+                <div class="header-cell">
+                  Número
+                  <p-sortIcon field="numeroDestino"></p-sortIcon>
+                </div>
+              </th>
+              <th pSortableColumn="estado">
+                <div class="header-cell">
+                  Estado
+                  <p-sortIcon field="estado"></p-sortIcon>
+                </div>
+              </th>
+              <th>Mensaje/Error</th>
+              <th>Tiempo</th>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="body" let-registro>
+            <tr class="table-row">
+              <td>
+                <div class="fecha-cell">
+                  <i class="pi pi-calendar"></i>
+                  <div>
+                    <span class="fecha-principal">{{ formatearFechaHora(registro.fechaEnvio) }}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="modulo-badge" 
+                     [style.background]="'linear-gradient(135deg, ' + getModuloInfo(registro.modulo || 'MENSAJERIA').color + '15 0%, ' + getModuloInfo(registro.modulo || 'MENSAJERIA').color + '25 100%)'">
+                  <i [class]="'pi ' + getModuloInfo(registro.modulo || 'MENSAJERIA').icono"
+                     [style.color]="getModuloInfo(registro.modulo || 'MENSAJERIA').color"></i>
+                  <span [style.color]="getModuloInfo(registro.modulo || 'MENSAJERIA').color">
+                    {{ getModuloInfo(registro.modulo || 'MENSAJERIA').nombre }}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <div class="socio-cell">
+                  <div class="socio-avatar">
+                    {{ obtenerIniciales(registro.nombreSocio) }}
+                  </div>
+                  <span class="socio-nombre">{{ registro.nombreSocio || 'N/A' }}</span>
+                </div>
+              </td>
+              <td>
+                <div class="telefono-cell">
+                  <i class="pi pi-phone"></i>
+                  <span>{{ registro.numeroDestino }}</span>
+                </div>
+              </td>
+              <td>
+                <p-tag 
+                  [value]="registro.estado" 
+                  [severity]="getEstadoEnvioBadge(registro.estado)"
+                  [icon]="registro.estado === 'EXITOSO' ? 'pi pi-check' : (registro.estado === 'FALLIDO' ? 'pi pi-times' : 'pi pi-clock')">
+                </p-tag>
+              </td>
+              <td>
+                <div class="mensaje-cell">
+                  <span *ngIf="registro.estado === 'EXITOSO'" class="mensaje-preview">
+                    {{ registro.mensaje | slice:0:60 }}{{ registro.mensaje?.length! > 60 ? '...' : '' }}
+                  </span>
+                  <span *ngIf="registro.estado === 'FALLIDO'" class="error-message">
+                    <i class="pi pi-exclamation-triangle"></i>
+                    {{ registro.mensajeError | slice:0:60 }}{{ registro.mensajeError?.length! > 60 ? '...' : '' }}
+                  </span>
+                  <span *ngIf="registro.estado === 'PENDIENTE'" class="pending-message">
+                    <i class="pi pi-clock"></i>
+                    En proceso...
+                  </span>
+                </div>
+              </td>
+              <td>
+                <span class="tiempo-relativo">
+                  {{ formatearFechaRelativa(registro.fechaEnvio) }}
+                </span>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7">
+                <div class="empty-state">
+                  <div class="empty-icon">
+                    <i class="pi pi-inbox"></i>
+                  </div>
+                  <h3>No hay registros disponibles</h3>
+                  <p>No se encontraron registros con los filtros aplicados</p>
+                  <p-button 
+                    label="Limpiar Filtros" 
+                    icon="pi pi-filter-slash"
+                    severity="info"
+                    [outlined]="true"
+                    (onClick)="limpiarFiltros()">
+                  </p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="loadingbody">
+            <tr>
+              <td colspan="7">
+                <div class="loading-state">
+                  <p-progressSpinner styleClass="custom-spinner"></p-progressSpinner>
+                  <p>Cargando registros...</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+        </p-table>
+      </div>
+
+    </div>
+  </section>
+
+</div>
+
+<!-- 🎯 Componentes de PrimeNG -->
+<p-toast></p-toast>

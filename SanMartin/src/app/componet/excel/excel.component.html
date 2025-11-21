@@ -1,0 +1,60 @@
+<div class="card p-4">
+
+  <h2 class="mb-3">Enviar Mensaje a Socios</h2>
+
+  <!-- Cargar Excel -->
+  <p-fileUpload 
+    mode="basic" 
+    name="file" 
+    chooseLabel="Seleccionar Excel"
+    accept=".xls,.xlsx"
+    [auto]="false"
+    (onSelect)="onFileSelected($event)">
+  </p-fileUpload>
+
+  <p *ngIf="excelData.length > 0" class="mt-2 text-green-600">
+    {{ excelData.length }} socios cargados desde el Excel.
+  </p>
+
+  <!-- Mensaje -->
+  <div class="mt-4">
+    <label><strong>Mensaje a enviar:</strong></label>
+    <textarea 
+      pInputTextarea 
+      rows="5" 
+      [(ngModel)]="mensaje"
+      class="w-full">
+    </textarea>
+  </div>
+
+  <!-- Vista previa de socios -->
+  <div *ngIf="excelData.length > 0" class="mt-4">
+    <h3>Vista previa:</h3>
+
+    <p-table [value]="excelData" [paginator]="true" [rows]="10">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Número de Socio</th>
+          <th>Nombres</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-s>
+        <tr>
+          <td>{{ s.numeroSocio }}</td>
+          <td>{{ s.nombres }}</td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Botón de envío -->
+  <button 
+    pButton 
+    label="Enviar Mensajes" 
+    class="mt-4"
+    icon="pi pi-send"
+    [disabled]="mensaje.length === 0 || excelData.length === 0"
+    (click)="enviarMensajes()">
+  </button>
+
+</div>

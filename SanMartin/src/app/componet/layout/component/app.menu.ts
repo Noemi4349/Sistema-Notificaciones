@@ -36,9 +36,30 @@ export class AppMenu {
                         command: () => {
                             console.log('Navegando a /layout/creditos');
                         }
+                    },
+                    {
+                        label: 'Registros de Envíos',
+                        icon: 'pi pi-history',
+                        routerLink: ['/layout/registros'],
+                        command: () => {
+                            console.log('Navegando a /layout/registros');
+                        }
                     }
                 ]
             },
+            {
+                label: 'Mensajería',
+                items: [
+                    {
+                        label: 'Enviar Mensajes Excel',
+                        icon: 'pi pi-send',
+                        routerLink: ['/layout/excel'],
+                        command: () => {
+                            console.log('Navegando a /layout/excel');
+                        }
+                    }
+                ]
+            }
            
         ];
     }

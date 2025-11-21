@@ -4,7 +4,8 @@ import { Dashboard } from './app/pages/dashboard/dashboard';
 import { LoginComponent } from './app/componet/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
 import { CreditosComponent } from '@/componet/creditos/creditos.component';
-
+import { RegistrosComponent } from '@/componet/registros/registros.component';
+import { ExcelComponent } from '@/componet/excel/excel.component';
 export const appRoutes: Routes = [
     { path: '', component: LoginComponent },
  
@@ -14,6 +15,13 @@ export const appRoutes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard},
       { path: 'creditos', component: CreditosComponent },
+      { 
+                path: 'registros', 
+                component: RegistrosComponent,
+                data: { title: 'Registros de Envíos' }
+            },
+      { path: "excel", component: ExcelComponent },
+
     ]
   },
 ];
