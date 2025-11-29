@@ -131,10 +131,10 @@
           </p-button>
 
           <p-button
-            label="Registros"
+            label="Historial Completo"
             icon="pi pi-chart-bar"
             severity="help"
-            (onClick)="abrirRegistros()">
+            (onClick)="abrirHistorialCompleto()">
           </p-button>
 
           <p-button
@@ -648,7 +648,7 @@
   </ng-template>
 </p-dialog>
 
-<!-- 🎨 DIÁLOGO: Historial de Envíos -->
+<!-- 🎨 DIÁLOGO: Historial Individual -->
 <p-dialog 
   [(visible)]="displayHistorialDialog" 
   [modal]="true" 
@@ -760,159 +760,6 @@
       [loading]="loadingEnvio">
     </p-button>
   </ng-template>
-</p-dialog>
-
-<!-- 🎨 DIÁLOGO: Registros de Envíos -->
-<p-dialog 
-  [(visible)]="displayRegistrosDialog" 
-  [modal]="true" 
-  [style]="{width: '95%', maxWidth: '1200px'}"
-  [draggable]="false"
-  [resizable]="false"
-  header="📊 Todos los Registros de Envíos">
-  
-  <div class="registros-content">
-    
-    <!-- Filtros de Registros -->
-    <div class="registros-filters">
-      <div class="search-wrapper">
-        <i class="pi pi-search"></i>
-        <input 
-          type="text" 
-          pInputText 
-          [(ngModel)]="busquedaRegistro"
-          (input)="aplicarFiltrosRegistros()"
-          placeholder="Buscar por número o mensaje..." 
-          class="search-input"/>
-      </div>
-
-      <p-selectButton 
-        [options]="[
-          {label: 'Todos', value: 'TODOS'},
-          {label: 'Exitosos', value: 'EXITOSO'},
-          {label: 'Fallidos', value: 'FALLIDO'}
-        ]" 
-        [(ngModel)]="filtroEstadoRegistro"
-        (onChange)="aplicarFiltrosRegistros()"
-        optionLabel="label"
-        optionValue="value">
-      </p-selectButton>
-
-      <p-button 
-        label="Limpiar" 
-        icon="pi pi-filter-slash" 
-        (onClick)="limpiarFiltrosRegistros()"
-        severity="secondary"
-        [text]="true">
-      </p-button>
-
-      <p-button 
-        label="Exportar CSV" 
-        icon="pi pi-download" 
-        (onClick)="exportarRegistrosCSV()"
-        severity="help">
-      </p-button>
-    </div>
-
-    <!-- Resumen de Registros -->
-    <div class="registros-summary">
-      <div class="summary-card">
-        <i class="pi pi-list"></i>
-        <div>
-          <span class="summary-value">{{ registrosFiltrados.length }}</span>
-          <span class="summary-label">Total</span>
-        </div>
-      </div>
-      <div class="summary-card success">
-        <i class="pi pi-check-circle"></i>
-        <div>
-          <span class="summary-value">{{ contarPorEstado('EXITOSO') }}</span>
-          <span class="summary-label">Exitosos</span>
-        </div>
-      </div>
-              <div class="summary-card danger">
-        <i class="pi pi-times-circle"></i>
-        <div>
-          <span class="summary-value">{{ contarPorEstado('FALLIDO') }}</span>
-          <span class="summary-label">Fallidos</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Tabla de Registros -->
-    <p-table 
-      [value]="registrosFiltrados" 
-      [paginator]="true" 
-      [rows]="10"
-      [loading]="loadingRegistros"
-      responsiveLayout="scroll"
-      [rowHover]="true"
-      [showCurrentPageReport]="true"
-      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} registros">
-      
-      <ng-template pTemplate="header">
-        <tr>
-          <th pSortableColumn="fechaEnvio">
-            Fecha/Hora
-            <p-sortIcon field="fechaEnvio"></p-sortIcon>
-          </th>
-          <th>Socio</th>
-          <th pSortableColumn="numeroDestino">
-            Número
-            <p-sortIcon field="numeroDestino"></p-sortIcon>
-          </th>
-          <th pSortableColumn="estado">
-            Estado
-            <p-sortIcon field="estado"></p-sortIcon>
-          </th>
-          <th>Mensaje/Error</th>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="body" let-registro>
-        <tr>
-          <td>{{ formatearFechaHora(registro.fechaEnvio) }}</td>
-          <td>
-            <span class="socio-nombre">{{ registro.nombreSocio || 'N/A' }}</span>
-          </td>
-          <td>
-            <div class="contact-info">
-              <i class="pi pi-phone"></i>
-              <span>{{ registro.numeroDestino }}</span>
-            </div>
-          </td>
-          <td>
-            <p-tag 
-              [value]="registro.estado" 
-              [severity]="getEstadoEnvioBadge(registro.estado)"
-              [icon]="registro.estado === 'EXITOSO' ? 'pi pi-check' : 'pi pi-times'">
-            </p-tag>
-          </td>
-          <td>
-            <span *ngIf="registro.estado === 'EXITOSO'" class="mensaje-preview">
-              {{ registro.mensaje | slice:0:50 }}{{ registro.mensaje?.length > 50 ? '...' : '' }}
-            </span>
-            <span *ngIf="registro.estado === 'FALLIDO'" class="error-text">
-              <i class="pi pi-exclamation-triangle"></i>
-              {{ registro.mensajeError }}
-            </span>
-          </td>
-        </tr>
-      </ng-template>
-
-      <ng-template pTemplate="emptymessage">
-        <tr>
-          <td colspan="5">
-            <div class="empty-state-small">
-              <i class="pi pi-inbox"></i>
-              <p>No hay registros que mostrar</p>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
-
-    </p-table>
-  </div>
 </p-dialog>
 
 <!-- 🎯 Componentes de PrimeNG -->

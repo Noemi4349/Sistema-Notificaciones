@@ -1,23 +1,129 @@
-.card {
-  //background: white;
+/* excel.component.scss estilo similar a módulo créditos */
+
+.excel-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: fadeIn 0.4s ease;
+}
+
+/* HEADER */
+.main-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  animation: slideInLeft 0.5s ease;
+}
+.page-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary-text-color);
+}
+.subtitle {
+  margin-top: -6px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+}
+
+/* TARJETAS */
+.registros-content,
+.dialog-content {
+  animation: slideInRight 0.5s ease;
+  border-radius: 14px;
+  padding: 1rem;
+}
+
+.section-title {
+  font-weight: 700;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+/* UPLOAD AREA */
+.upload-area {
+  padding: 2rem;
+  border: 2px dashed var(--primary-color);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: 0.25s;
+  background: var(--surface-card);
+}
+.upload-area:hover {
+  background: rgba(59,130,246,0.08);
+  border-color: var(--primary-700);
+}
+.upload-icon {
+  font-size: 2rem;
+  color: var(--primary-color);
+}
+.upload-text {
+  margin-top: 0.5rem;
+  color: var(--primary-700);
+  font-weight: 600;
+}
+.file-name {
+  margin-top: 1rem;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+/* MESSAGE TEXTAREA */
+.message-box {
+  width: 100%;
+  height: 120px;
+  padding: 1rem;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid var(--surface-border);
+  background: var(--surface-ground);
+  color: var(--text-color);
+  transition: 0.2s;
+}
+.message-box:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 4px rgba(59,130,246,0.4);
 }
 
-h2, h3 {
-  color: #2a3d66;
+/* BOTONES */
+.button-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
 }
 
-textarea {
-  border-radius: 6px;
-  padding: .5rem;
+/* ANIMACIONES */
+@keyframes slideInLeft {
+  from { transform: translateX(-25px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideInRight {
+  from { transform: translateX(25px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-.p-button {
-  background: #a084e8;
-  border: none;
-}
-
-.p-button:hover {
-  background: #8667e9;
+/* DARK MODE */
+.dark {
+  .upload-area {
+    background: #2d3748;
+    border-color: var(--primary-color);
+  }
+  .upload-text,
+  .file-name,
+  .page-title,
+  .section-title {
+    color: var(--text-color);
+  }
+  .message-box {
+    background: #1f2937;
+    color: var(--text-color);
+    border-color: #4b5563;
+  }
 }

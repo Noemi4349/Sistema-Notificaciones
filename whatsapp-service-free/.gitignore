@@ -1,0 +1,3 @@
+# Ignorar sesiones de WhatsApp Baileys
+whatsapp-service-free/auth_info_baileys/
+whatsapp-service-free/auth_info_baileys/**/*.json

@@ -30,26 +30,25 @@ export class ExcelComponent {
 
   excelData: any[] = [];
   mensaje: string = '';
+  archivoExcel: File | null = null;
+  fileName: string = '';
+
 
   constructor(
     private excelService: ExcelService,
     private messageService: MessageService
   ) {}
 
-  // -----------------------------
-  // Cargar archivo Excel
-  // -----------------------------
+  // ------------------------------------------------
+  // Leer Excel
+  // ------------------------------------------------
   onFileSelected(event: any) {
-    const file = event.currentFiles[0];
+    const file = event.target.files[0];
 
-    if (!file) {
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'No se seleccionó ningún archivo.'
-      });
-      return;
-    }
+    if (!file) return;
+
+    this.archivoExcel = file;
+    this.fileName = file.name; 
 
     const reader = new FileReader();
 
@@ -60,64 +59,122 @@ export class ExcelComponent {
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const json = XLSX.utils.sheet_to_json(sheet);
 
-      // Mapear columnas dinámicamente
-      this.excelData = json.map((item: any) => ({
-        numeroSocio:
-          item.numeroSocio || item.NUMERO || item.Numero || item.SOCIO || '',
-        nombres:
-          item.nombres || item.Nombres || item.Nombre || item.NOMBRE || ''
-      }));
+      this.excelData = json.map((item: any) => {
+        const numero = (item["Numero Telefono"] || item.telefono || "").toString().replace(/\D/g, '');
 
-      if (this.excelData.length === 0) {
-        this.messageService.add({
-          severity: 'warn',
-          summary: 'Advertencia',
-          detail: 'El Excel no contiene datos válidos.'
-        });
-      }
+        return {
+          numeroSocio: item["Numero Socio"] || item.numeroSocio || "",
+          nombres: item["Nombre Completo"] || item.nombres || "",
+          numeroTelefono: numero,
+          valido: numero.length === 8
+        };
+      });
     };
 
     reader.readAsArrayBuffer(file);
   }
 
-  // -----------------------------
-  // Enviar Mensajes al Backend
-  // -----------------------------
-  enviarMensajes() {
-    if (!this.mensaje || this.excelData.length === 0) {
-      this.messageService.add({
-        severity: 'warn',
-        summary: 'Campos incompletos',
-        detail: 'Debe cargar un mensaje y un Excel.'
-      });
-      return;
-    }
+  // ------------------------------------------------
+  // Enviar archivo + mensaje al backend
+  // ------------------------------------------------
+ //enviarMensajes() {
+ // if (!this.archivoExcel || !this.mensaje.trim()) {
+  //  this.messageService.add({
+  //    severity: 'warn',
+  //    summary: 'Faltan datos',
+  //    detail: 'Selecciona un archivo y escribe un mensaje.'
+  //  });
+  //  return;
+  //}
 
-    const payload = {
-      mensaje: this.mensaje,
-      socios: this.excelData
-    };
+  //const formData = new FormData();
+  //formData.append('file', this.archivoExcel);
+  //formData.append('mensaje', this.mensaje);
 
-    this.excelService.enviarMensajes(payload).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Enviado',
-          detail: 'Mensajes enviados correctamente.'
-        });
+  //this.excelService.enviarExcel(this.archivoExcel, this.mensaje).subscribe({
+  //  next: (res) => {
+  //    this.messageService.add({
+  //      severity: 'success',
+  //      summary: 'Éxito',
+  //      detail: res
+  //    });
 
-        // Limpieza luego del envío
-        this.mensaje = '';
-        this.excelData = [];
-      },
-      error: (err) => {
-        console.error(err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Ocurrió un error al enviar los mensajes.'
-        });
-      }
+  //    this.mensaje = '';
+ //     this.excelData = [];
+ //     this.archivoExcel = null;
+  //  },
+  //  error: (err) => {
+  //    this.messageService.add({
+  //      severity: 'error',
+  //      summary: 'Error',
+  //      detail: err.error
+  //    });
+  //  }
+  //});
+//}
+   enviarMensajes() {
+  if (!this.archivoExcel || !this.mensaje.trim()) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Faltan datos',
+      detail: 'Selecciona un archivo y escribe un mensaje.'
     });
+    return;
   }
+
+  const formData = new FormData();
+  formData.append('file', this.archivoExcel);
+  formData.append('mensaje', this.mensaje);
+
+ this.excelService.enviarExcel(formData).subscribe({
+  next: (resp) => {
+    console.log("✔ Envíos completos:", resp);
+    this.messageService.add({ severity: 'success', summary: 'Éxito', detail: resp });
+  },
+
+     
+    error: (err) => {
+    console.error(err);
+    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'No se pudo enviar' });
+  }
+});
+  
+}
+
+  tieneNumerosInvalidos(): boolean {
+  return this.excelData && this.excelData.some(s => !s.valido);
+}
+
+guardarMensaje() {
+  if (!this.mensaje.trim()) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Mensaje vacío',
+      detail: 'Escribe un mensaje antes de guardar.'
+    });
+    return;
+  }
+
+  if (!this.archivoExcel) {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Archivo faltante',
+      detail: 'Sube un archivo Excel primero.'
+    });
+    return;
+  }
+
+  // Llamamos a enviarMensajes porque ya guarda todo en el backend
+  this.enviarMensajes();
+}
+
+cancelarMensaje() {
+  this.mensaje = '';
+  this.messageService.add({
+    severity: 'info',
+    summary: 'Cancelado',
+    detail: 'El mensaje fue cancelado.'
+  });
+}
+
 }

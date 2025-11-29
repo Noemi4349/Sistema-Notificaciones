@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Excel } from './excel';
+import { ExcelComponent } from './excel.component';
 
 describe('Excel', () => {
-  let component: Excel;
-  let fixture: ComponentFixture<Excel>;
+  let component: ExcelComponent;
+  let fixture: ComponentFixture<ExcelComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [Excel]
+      imports: [ExcelComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(Excel);
+    fixture = TestBed.createComponent(ExcelComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

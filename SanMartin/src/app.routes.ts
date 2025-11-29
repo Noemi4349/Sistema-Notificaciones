@@ -5,6 +5,7 @@ import { LoginComponent } from './app/componet/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
 import { CreditosComponent } from '@/componet/creditos/creditos.component';
 import { RegistrosComponent } from '@/componet/registros/registros.component';
+import { HistorialEnviosComponent } from '@/componet/historial-envios/historial-envios.component';
 import { ExcelComponent } from '@/componet/excel/excel.component';
 export const appRoutes: Routes = [
     { path: '', component: LoginComponent },
@@ -20,6 +21,7 @@ export const appRoutes: Routes = [
                 component: RegistrosComponent,
                 data: { title: 'Registros de Envíos' }
             },
+      { path: 'historial-envios', component: HistorialEnviosComponent, data: { title: 'Historial de Envíos' } },
       { path: "excel", component: ExcelComponent },
 
     ]

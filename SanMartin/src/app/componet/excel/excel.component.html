@@ -1,56 +1,67 @@
-<div class="card p-4">
+<!-- excel.component.html mejorado sin cambiar tu estructura original -->
+<div class="excel-wrapper">
 
-  <h2 class="mb-3">Enviar Mensaje a Socios</h2>
+  <!-- ENCABEZADO SIMPLE (manteniendo tu estilo original) -->
+  <h2 class="section-title">Enviar Mensajes a Socios </h2>
+  <p class="subtitle">Cargando un Archivo Excel</p>
 
-  <!-- Cargar Excel -->
-  <p-fileUpload 
-    mode="basic" 
-    name="file" 
-    chooseLabel="Seleccionar Excel"
-    accept=".xls,.xlsx"
-    [auto]="false"
-    (onSelect)="onFileSelected($event)">
-  </p-fileUpload>
+  <!-- CARD DE SUBIDA -->
+  <div class="card upload-card">
+    <div class="upload-area" (click)="fileInput.click()">
+      <i class="pi pi-upload upload-icon"></i>
+      <p class="upload-text">Selecciona un archivo Excel</p>
+      <input #fileInput type="file" (change)="onFileSelected($event)" hidden />
+    </div>
 
-  <p *ngIf="excelData.length > 0" class="mt-2 text-green-600">
-    {{ excelData.length }} socios cargados desde el Excel.
-  </p>
-
-  <!-- Mensaje -->
-  <div class="mt-4">
-    <label><strong>Mensaje a enviar:</strong></label>
-    <textarea 
-      pInputTextarea 
-      rows="5" 
-      [(ngModel)]="mensaje"
-      class="w-full">
-    </textarea>
+    <p class="file-name" *ngIf="fileName">Archivo seleccionado: {{ fileName }}</p>
   </div>
 
-  <!-- Vista previa de socios -->
-  <div *ngIf="excelData.length > 0" class="mt-4">
-    <h3>Vista previa:</h3>
+  <!-- Vista previa de Excel -->
+<div class="card mt-4" *ngIf="excelData.length > 0">
+  <h3 class="section-title">Vista previa del archivo</h3>
 
-    <p-table [value]="excelData" [paginator]="true" [rows]="10">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>Número de Socio</th>
-          <th>Nombres</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-s>
-        <tr>
-          <td>{{ s.numeroSocio }}</td>
-          <td>{{ s.nombres }}</td>
-        </tr>
-      </ng-template>
-    </p-table>
+  <p-table [value]="excelData" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Nro Socio</th>
+        <th>Nombre</th>
+        <th>Teléfono</th>
+        <th>Valido</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td>{{ row.numeroSocio }}</td>
+        <td>{{ row.nombres }}</td>
+        <td>{{ row.numeroTelefono }}</td>
+        <td>
+          <span [ngClass]="row.valido ? 'text-green-600' : 'text-red-600'">
+            {{ row.valido ? '✓' : '✗' }}
+          </span>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</div>
+
+
+  <!-- CARD DEL MENSAJE -->
+  <div class="card message-card mt-4">
+    <h3 class="section-title">Mensaje</h3>
+
+    <textarea [(ngModel)]="mensaje" class="message-box" placeholder="Escribe tu mensaje..."></textarea>
+
+    <div class="button-row mt-2">
+      <button pButton label="Guardar" class="p-button-primary" (click)="guardarMensaje()"></button>
+      <button pButton label="Cancelar" class="p-button-secondary" (click)="cancelarMensaje()"></button>
+    </div>
   </div>
 
   <!-- Botón de envío -->
   <button 
     pButton 
-    label="Enviar Mensajes" 
+    label="Enviar Mensaje" 
     class="mt-4"
     icon="pi pi-send"
     [disabled]="mensaje.length === 0 || excelData.length === 0"
