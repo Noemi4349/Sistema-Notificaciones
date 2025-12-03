@@ -2,7 +2,9 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CreditosService, RegistroEnvio } from 'src/app/service/creditos.service';
+import { ExcelService } from 'src/app/service/excel.service';
 import { MessageService } from 'primeng/api';
+import * as XLSX from 'xlsx';
 
 // PrimeNG Imports
 import { TableModule } from 'primeng/table';
@@ -29,6 +31,13 @@ interface ModuloRegistro {
 interface RegistroExtendido extends RegistroEnvio {
   nombreSocio?: string;
   modulo?: string;
+}
+
+interface SocioExcel {
+  numeroSocio: string;
+  nombres: string;
+  numeroTelefono: string;
+  valido: boolean;
 }
 
 @Component({
@@ -100,8 +109,26 @@ export class RegistrosComponent implements OnInit, OnDestroy {
   // Intervalo de actualización automática
   intervaloActualizacion: any = null;
 
+    // ========== NUEVAS PROPIEDADES PARA EXCEL ==========
+  excelData: SocioExcel[] = [];
+  mensaje: string = '';
+  archivoExcel: File | null = null;
+  fileName: string = '';
+  enviandoMensajes: boolean = false;
+  activeTabIndex: number = 0; // 0 = Registros, 1 = Enviar Mensajes
+
+  // ========== Detalles de Registro ==========
+  registroSeleccionado: RegistroExtendido | null = null;
+  mostrarDialogoDetalle: boolean = false;
+
+  private modulosCargados = {
+    creditos: false,
+    mensajeria: false
+  };
+
   constructor(
     private creditosService: CreditosService,
+    private excelService: ExcelService,
     private messageService: MessageService
   ) {}
 

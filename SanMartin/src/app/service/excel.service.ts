@@ -35,5 +35,21 @@ export class ExcelService {
     return this.http.post(`${this.API_URL}/leer`, formData);
   }
 
+ // guardarMensaje(formData: FormData) {
+ // return this.http.post(`${this.API_URL}/guardar-mensaje`, formData);
+//}
+//guardarMensaje(formData: FormData) {
+  //return this.http.post(`${this.API_URL}/guardar-mensaje`, formData, {
+    //responseType: 'text'
+  //});
+//}
+guardarMensaje(formData: FormData) {
+  return this.http.post(
+    this.API_URL + '/guardar-mensaje',
+    formData,
+    { responseType: 'text' }
+  );
+}
+
 }
 

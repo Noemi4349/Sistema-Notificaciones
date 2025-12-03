@@ -53,8 +53,22 @@
     <textarea [(ngModel)]="mensaje" class="message-box" placeholder="Escribe tu mensaje..."></textarea>
 
     <div class="button-row mt-2">
-      <button pButton label="Guardar" class="p-button-primary" (click)="guardarMensaje()"></button>
-      <button pButton label="Cancelar" class="p-button-secondary" (click)="cancelarMensaje()"></button>
+      <button 
+  pButton 
+  label="Guardar" 
+  class="p-button-primary" 
+  type="button"
+  (click)="guardarMensaje()">
+</button>
+      
+      <button 
+  pButton 
+  label="Cancelar" 
+  class="p-button-secondary" 
+  type="button"
+  (click)="cancelarMensaje()">
+</button>
+
     </div>
   </div>
 

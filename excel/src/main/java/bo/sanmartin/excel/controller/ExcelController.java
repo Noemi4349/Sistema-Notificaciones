@@ -160,4 +160,30 @@ public ResponseEntity<?> procesarYEnviar(
     }
 }
 
+@PostMapping("/guardar-mensaje")
+public ResponseEntity<?> guardarMensaje(
+        @RequestParam("file") MultipartFile file,
+        @RequestParam("mensaje") String mensaje) {
+
+    try {
+        // Solo lee el excel, no envía nada
+        List<SocioExcelDto> socios = excelService.leerExcel(file);
+
+        // Guarda un registro por cada socio (si eso quieres)
+        for (SocioExcelDto socio : socios) {
+            String numero = socio.getNumeroTelefono();
+
+            if (numero != null && !numero.isEmpty()) {
+                mensajeEnviadoService.guardar(numero, mensaje);
+            }
+        }
+
+        return ResponseEntity.ok("Mensaje(s) guardado(s) correctamente.");
+
+    } catch (Exception e) {
+        return ResponseEntity.status(500)
+                .body("Error al guardar mensaje: " + e.getMessage());
+    }
+}
+
 }

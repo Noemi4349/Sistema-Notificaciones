@@ -164,9 +164,28 @@ guardarMensaje() {
     return;
   }
 
-  // Llamamos a enviarMensajes porque ya guarda todo en el backend
-  this.enviarMensajes();
+  const formData = new FormData();
+  formData.append('file', this.archivoExcel);
+  formData.append('mensaje', this.mensaje);
+
+  this.excelService.guardarMensaje(formData).subscribe({
+    next: (resp) => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Guardado',
+        detail: 'El mensaje fue guardado correctamente.'
+      });
+    },
+    error: () => {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'No se pudo guardar el mensaje.'
+      });
+    }
+  });
 }
+
 
 cancelarMensaje() {
   this.mensaje = '';

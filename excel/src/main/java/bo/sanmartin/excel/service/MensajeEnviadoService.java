@@ -27,6 +27,9 @@ public class MensajeEnviadoService {
     m.setNumeroTelefono(numero);
     m.setMensaje(mensaje);
     m.setFechaEnvio(LocalDateTime.now());
+    m.setEstado("ENVIADO");
+        m.setSocioId(null);
+       
     repository.save(m);
 }
 
