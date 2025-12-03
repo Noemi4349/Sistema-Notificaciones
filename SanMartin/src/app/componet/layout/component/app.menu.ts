@@ -45,14 +45,6 @@ export class AppMenu {
                             console.log('Navegando a /layout/registros');
                         }
                     },
-                    {
-                        label: 'Historial de Envíos',
-                        icon: 'pi pi-history',
-                        routerLink: ['/layout/historial-envios'],
-                        command: () => {
-                            console.log('Navegando a /layout/historial-envios');
-                        }
-                    }
                 ]
             },
             {
